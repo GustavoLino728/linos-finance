@@ -1,7 +1,7 @@
 import type { Transaction, ApiResponse } from "../types/Transaction"
 
 // Configure o IP do seu backend aqui
-const API_BASE_URL = "http://192.168.0.102:5000" // Substitua pelo IP da sua máquina
+const API_BASE_URL = "https://organizacao-financeira-app.onrender.com" // Substitua pelo IP da sua máquina
 
 export class ApiService {
   static async addLancamento(transaction: Transaction): Promise<ApiResponse> {

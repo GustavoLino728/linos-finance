@@ -1,5 +1,4 @@
 
 venv/
-backend/google_credentials.json
 *.pyc
 __pycache__/

@@ -1,6 +1,14 @@
+import json
+import os
 import gspread
+from google.oauth2.service_account import Credentials
 
-gc = gspread.service_account(filename="google_credentials.json")
+credentials_json = os.environ.get("GOOGLE_CREDENTIALS")
+credentials_dict = json.loads(credentials_json)
+
+credentials = Credentials.from_service_account_info(credentials_dict)
+gc = gspread.authorize(credentials)
+
 lancamentos = gc.open("App-Finanças").worksheet("Lançamentos")
 
 def inserirLancamento(data, tipo, desc, valor, categoria="", metodoPag=""):
