@@ -3,9 +3,11 @@ import os
 import gspread
 from google.oauth2.service_account import Credentials
 
-credentials_json = os.environ.get("GOOGLE_CREDENTIALS")
-credentials_dict = json.loads(credentials_json.replace('\\n', '\n'))
+credentials_json = os.getenv("GOOGLE_CREDENTIALS")
+credentials_dict = json.loads(credentials_json)
+credentials_dict["private_key"] = credentials_dict["private_key"].replace("\\n", "\n")
 credentials = Credentials.from_service_account_info(credentials_dict)
+
 gc = gspread.authorize(credentials)
 
 lancamentos = gc.open("App-Finanças").worksheet("Lançamentos")
