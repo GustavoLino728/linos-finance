@@ -1,8 +1,9 @@
 from main import inserirLancamento
-from flask import request, jsonify
-from flask import Flask
+from flask import request, jsonify, Flask
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/add-lancamento', methods=['POST'])
 def add_lancamento():
@@ -18,4 +19,4 @@ def add_lancamento():
     return jsonify({"mensagem": "Lançamento adicionado com sucesso"}), 201
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True, host='0.0.0.0', port=5000)
