@@ -11,9 +11,10 @@ import {
   ScrollView,
   Platform,
   Animated,
+  Modal,
+  FlatList,
 } from "react-native"
 import DateTimePicker from "@react-native-community/datetimepicker"
-import { Picker } from "@react-native-picker/picker"
 import { Colors } from "../constants/Colors"
 import type { TransactionFormData, Transaction } from "../types/Transaction"
 import { ApiService } from "../services/api"
@@ -63,6 +64,52 @@ function SliderToggle({ value, onValueChange }: SliderToggleProps) {
   )
 }
 
+// Componente Picker Customizado Integrado
+interface PickerModalProps {
+  visible: boolean
+  title: string
+  items: string[]
+  selectedValue: string
+  onSelect: (value: string) => void
+  onClose: () => void
+}
+
+function PickerModal({ visible, title, items, selectedValue, onSelect, onClose }: PickerModalProps) {
+  const handleSelect = (value: string) => {
+    onSelect(value)
+    onClose()
+  }
+
+  return (
+    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>{title}</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>✕</Text>
+            </TouchableOpacity>
+          </View>
+
+          <FlatList
+            data={items}
+            keyExtractor={(item) => item}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[styles.option, selectedValue === item && styles.selectedOption]}
+                onPress={() => handleSelect(item)}
+              >
+                <Text style={[styles.optionText, selectedValue === item && styles.selectedOptionText]}>{item}</Text>
+                {selectedValue === item && <Text style={styles.checkmark}>✓</Text>}
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+      </View>
+    </Modal>
+  )
+}
+
 export default function TransactionForm() {
   const [formData, setFormData] = useState<TransactionFormData>({
     tipo: "entrada",
@@ -76,9 +123,12 @@ export default function TransactionForm() {
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  // Estados para os modais dos pickers
+  const [showCategoriaModal, setShowCategoriaModal] = useState(false)
+  const [showMetodoModal, setShowMetodoModal] = useState(false)
+
   // Categorias baseadas no seu backend
   const categorias = ["Alimentação", "Transporte", "Lazer", "Saúde", "Educação", "Casa", "Roupas", "Itens", "Outros"]
-
   const metodosPagamento = ["Dinheiro", "Cartão de Débito", "Cartão de Crédito", "PIX", "Transferência", "Outros"]
 
   const handleSubmit = async () => {
@@ -113,6 +163,7 @@ export default function TransactionForm() {
         }),
       }
 
+      console.log("Enviando transação:", transaction)
       const result = await ApiService.addLancamento(transaction)
 
       if (result.success) {
@@ -203,33 +254,19 @@ export default function TransactionForm() {
             {/* Categoria */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Categoria</Text>
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={formData.categoria}
-                  onValueChange={(value) => setFormData({ ...formData, categoria: value })}
-                  style={styles.picker}
-                >
-                  {categorias.map((categoria) => (
-                    <Picker.Item key={categoria} label={categoria} value={categoria} />
-                  ))}
-                </Picker>
-              </View>
+              <TouchableOpacity style={styles.pickerInput} onPress={() => setShowCategoriaModal(true)}>
+                <Text style={styles.pickerText}>{formData.categoria}</Text>
+                <Text style={styles.pickerArrow}>▼</Text>
+              </TouchableOpacity>
             </View>
 
             {/* Método de Pagamento */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Método de Pagamento</Text>
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={formData.metodo_pagamento}
-                  onValueChange={(value) => setFormData({ ...formData, metodo_pagamento: value })}
-                  style={styles.picker}
-                >
-                  {metodosPagamento.map((metodo) => (
-                    <Picker.Item key={metodo} label={metodo} value={metodo} />
-                  ))}
-                </Picker>
-              </View>
+              <TouchableOpacity style={styles.pickerInput} onPress={() => setShowMetodoModal(true)}>
+                <Text style={styles.pickerText}>{formData.metodo_pagamento}</Text>
+                <Text style={styles.pickerArrow}>▼</Text>
+              </TouchableOpacity>
             </View>
           </>
         )}
@@ -243,6 +280,25 @@ export default function TransactionForm() {
           <Text style={styles.submitButtonText}>{loading ? "Salvando..." : "💾 Salvar Lançamento"}</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Modais dos Pickers */}
+      <PickerModal
+        visible={showCategoriaModal}
+        title="Selecionar Categoria"
+        items={categorias}
+        selectedValue={formData.categoria}
+        onSelect={(value) => setFormData({ ...formData, categoria: value })}
+        onClose={() => setShowCategoriaModal(false)}
+      />
+
+      <PickerModal
+        visible={showMetodoModal}
+        title="Selecionar Método de Pagamento"
+        items={metodosPagamento}
+        selectedValue={formData.metodo_pagamento}
+        onSelect={(value) => setFormData({ ...formData, metodo_pagamento: value })}
+        onClose={() => setShowMetodoModal(false)}
+      />
     </ScrollView>
   )
 }
@@ -296,19 +352,99 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.text,
   },
-  pickerContainer: {
+  // Estilos do Picker Customizado
+  pickerInput: {
     backgroundColor: Colors.surface,
     borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     borderWidth: 1,
     borderColor: Colors.border,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
   },
-  picker: {
-    height: 50,
+  pickerText: {
+    fontSize: 16,
+    color: Colors.text,
+    flex: 1,
+  },
+  pickerArrow: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+  },
+  // Estilos do Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    width: "90%",
+    maxHeight: "70%",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: Colors.text,
+  },
+  closeButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: Colors.border,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  closeButtonText: {
+    fontSize: 16,
+    color: Colors.text,
+  },
+  option: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  selectedOption: {
+    backgroundColor: Colors.primary + "20",
+  },
+  optionText: {
+    fontSize: 16,
+    color: Colors.text,
+    flex: 1,
+  },
+  selectedOptionText: {
+    color: Colors.primary,
+    fontWeight: "600",
+  },
+  checkmark: {
+    fontSize: 16,
+    color: Colors.primary,
+    fontWeight: "bold",
   },
   submitButton: {
     backgroundColor: Colors.primary,

@@ -2,27 +2,34 @@
   "expo": {
     "name": "Organização Financeira",
     "slug": "organizacao-financeira",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
+    "platforms": ["android"],
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#2563eb"
     },
     "assetBundlePatterns": ["**/*"],
-    "ios": {
-      "supportsTablet": true
-    },
     "android": {
+      "package": "com.gustavo.organizacaofinanceira",
+      "versionCode": 2,
+      "icon": "./assets/icon.png",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#2563eb"
-      }
+      },
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/icon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d60a2cff-37f0-4472-acb1-81e6bb551511"
+      }
     }
   }
 }

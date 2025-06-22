@@ -15,7 +15,10 @@
     "react-native": "0.79.4",
     "@react-native-community/datetimepicker": "8.3.0",
     "@react-native-picker/picker": "2.11.0",
-    "expo-dev-client": "~5.2.1"
+    "expo-dev-client": "~5.2.1",
+    "react-dom": "19.0.0",
+    "react-native-web": "^0.20.0",
+    "@expo/metro-runtime": "~5.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

@@ -12,7 +12,7 @@ export class ApiService {
         valor: transaction.valor,
         data: transaction.data,
         categoria: transaction.categoria,
-        metodo_pagamento: transaction.metodo_pagamento,
+        metodoPag: transaction.metodo_pagamento,
     }
       const response = await fetch(`${API_BASE_URL}/add-lancamento`, {
         method: "POST",
