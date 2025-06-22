@@ -4,8 +4,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 credentials_json = os.environ.get("GOOGLE_CREDENTIALS")
-credentials_dict = json.loads(credentials_json)
-
+credentials_dict = json.loads(credentials_json.replace('\\n', '\n'))
 credentials = Credentials.from_service_account_info(credentials_dict)
 gc = gspread.authorize(credentials)
 
