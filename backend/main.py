@@ -3,11 +3,16 @@ import os
 import gspread
 from google.oauth2.service_account import Credentials
 
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
+
 credentials_json = os.getenv("GOOGLE_CREDENTIALS")
 credentials_dict = json.loads(credentials_json)
 credentials_dict = json.loads(credentials_dict)
 credentials_dict["private_key"] = credentials_dict["private_key"].replace("\\n", "\n")
-credentials = Credentials.from_service_account_info(credentials_dict)
+credentials = Credentials.from_service_account_info(credentials_dict, scopes=SCOPES)
 
 gc = gspread.authorize(credentials)
 
