@@ -2,9 +2,9 @@
   "expo": {
     "name": "Organização Financeira",
     "slug": "organizacao-financeira",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
-    "platforms": ["android"],
+    "platforms": ["android", "web"],
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -15,16 +15,19 @@
     "assetBundlePatterns": ["**/*"],
     "android": {
       "package": "com.gustavo.organizacaofinanceira",
-      "versionCode": 2,
+      "versionCode": 3,
       "icon": "./assets/icon.png",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#2563eb"
       },
-      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"]
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE", "ACCESS_WIFI_STATE"],
+      "usesCleartextTraffic": false
     },
     "web": {
-      "favicon": "./assets/icon.png"
+      "favicon": "./assets/icon.png",
+      "bundler": "metro",
+      "output": "single"
     },
     "extra": {
       "eas": {

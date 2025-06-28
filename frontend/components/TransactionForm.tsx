@@ -18,6 +18,7 @@ import DateTimePicker from "@react-native-community/datetimepicker"
 import { Colors } from "../constants/Colors"
 import type { TransactionFormData, Transaction } from "../types/Transaction"
 import { ApiService } from "../services/api"
+import CustomCheckbox from "./CustomCheckbox"
 
 // Componente do Toggle Arrastável
 interface SliderToggleProps {
@@ -113,11 +114,13 @@ function PickerModal({ visible, title, items, selectedValue, onSelect, onClose }
 export default function TransactionForm() {
   const [formData, setFormData] = useState<TransactionFormData>({
     tipo: "entrada",
-    descricao: "",
+    desc: "",
     valor: "",
     data: new Date().toISOString().split("T")[0],
     categoria: "Alimentação",
-    metodo_pagamento: "Dinheiro",
+    metodoPag: "Dinheiro",
+    parcelado: false,
+    parcelas: "2",
   })
 
   const [showDatePicker, setShowDatePicker] = useState(false)
@@ -133,7 +136,7 @@ export default function TransactionForm() {
 
   const handleSubmit = async () => {
     // Validações
-    if (!formData.descricao.trim()) {
+    if (!formData.desc.trim()) {
       Alert.alert("Erro", "Por favor, informe a descrição.")
       return
     }
@@ -149,17 +152,32 @@ export default function TransactionForm() {
       return
     }
 
+    // Validação específica para parcelamento
+    if (formData.tipo === "saida" && formData.metodoPag === "Cartão de Crédito" && formData.parcelado) {
+      const parcelas = Number.parseInt(formData.parcelas)
+      if (isNaN(parcelas) || parcelas < 2 || parcelas > 60) {
+        Alert.alert("Erro", "Número de parcelas deve ser entre 2 e 60.")
+        return
+      }
+    }
+
     setLoading(true)
 
     try {
-      const transaction: Transaction = {
+      const transaction: Omit<Transaction, "email"> = {
         tipo: formData.tipo,
-        descricao: formData.descricao.trim(),
+        desc: formData.desc.trim(),
         valor: valor,
         data: formData.data,
         ...(formData.tipo === "saida" && {
           categoria: formData.categoria,
-          metodo_pagamento: formData.metodo_pagamento,
+          metodoPag: formData.metodoPag,
+          ...(formData.metodoPag === "Cartão de Crédito" && {
+            parcelado: formData.parcelado,
+            ...(formData.parcelado && {
+              parcelas: Number.parseInt(formData.parcelas),
+            }),
+          }),
         }),
       }
 
@@ -167,15 +185,22 @@ export default function TransactionForm() {
       const result = await ApiService.addLancamento(transaction)
 
       if (result.success) {
-        Alert.alert("Sucesso", result.message)
+        const successMessage = formData.parcelado
+          ? `Lançamento parcelado em ${formData.parcelas}x adicionado com sucesso!`
+          : result.message
+
+        Alert.alert("Sucesso", successMessage)
+
         // Reset form
         setFormData({
           tipo: "entrada",
-          descricao: "",
+          desc: "",
           valor: "",
           data: new Date().toISOString().split("T")[0],
           categoria: "Alimentação",
-          metodo_pagamento: "Dinheiro",
+          metodoPag: "Dinheiro",
+          parcelado: false,
+          parcelas: "2",
         })
       } else {
         Alert.alert("Erro", result.message)
@@ -197,6 +222,16 @@ export default function TransactionForm() {
     }
   }
 
+  // Função para calcular valor da parcela
+  const calcularValorParcela = () => {
+    const valor = Number.parseFloat(formData.valor.replace(",", "."))
+    const parcelas = Number.parseInt(formData.parcelas)
+    if (!isNaN(valor) && !isNaN(parcelas) && parcelas > 0) {
+      return (valor / parcelas).toFixed(2).replace(".", ",")
+    }
+    return "0,00"
+  }
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.form}>
@@ -209,7 +244,16 @@ export default function TransactionForm() {
         {/* Slider Toggle para Tipo */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Tipo de Transação</Text>
-          <SliderToggle value={formData.tipo} onValueChange={(value) => setFormData({ ...formData, tipo: value })} />
+          <SliderToggle
+            value={formData.tipo}
+            onValueChange={(value) =>
+              setFormData({
+                ...formData,
+                tipo: value,
+                parcelado: false, // Reset parcelamento ao mudar tipo
+              })
+            }
+          />
         </View>
 
         {/* Descrição */}
@@ -217,8 +261,8 @@ export default function TransactionForm() {
           <Text style={styles.label}>Descrição</Text>
           <TextInput
             style={styles.input}
-            value={formData.descricao}
-            onChangeText={(text) => setFormData({ ...formData, descricao: text })}
+            value={formData.desc}
+            onChangeText={(text) => setFormData({ ...formData, desc: text })}
             placeholder="Ex: Almoço no restaurante"
             placeholderTextColor={Colors.textSecondary}
           />
@@ -264,10 +308,57 @@ export default function TransactionForm() {
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Método de Pagamento</Text>
               <TouchableOpacity style={styles.pickerInput} onPress={() => setShowMetodoModal(true)}>
-                <Text style={styles.pickerText}>{formData.metodo_pagamento}</Text>
+                <Text style={styles.pickerText}>{formData.metodoPag}</Text>
                 <Text style={styles.pickerArrow}>▼</Text>
               </TouchableOpacity>
             </View>
+
+            {/* Checkbox de Parcelamento - Só aparece se for Cartão de Crédito */}
+            {formData.metodoPag === "Cartão de Crédito" && (
+              <>
+                <CustomCheckbox
+                  checked={formData.parcelado}
+                  onPress={() =>
+                    setFormData({
+                      ...formData,
+                      parcelado: !formData.parcelado,
+                      parcelas: !formData.parcelado ? formData.parcelas : "2",
+                    })
+                  }
+                  label="💳 Compra Parcelada"
+                />
+
+                {/* Campo de Parcelas - Só aparece se parcelado estiver ativo */}
+                {formData.parcelado && (
+                  <>
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.label}>Número de Parcelas</Text>
+                      <TextInput
+                        style={styles.input}
+                        value={formData.parcelas}
+                        onChangeText={(text) => setFormData({ ...formData, parcelas: text })}
+                        placeholder="2"
+                        placeholderTextColor={Colors.textSecondary}
+                        keyboardType="numeric"
+                      />
+                    </View>
+
+                    {/* Mostrar valor da parcela */}
+                    {formData.valor && formData.parcelas && (
+                      <View style={styles.parcelaInfo}>
+                        <Text style={styles.parcelaText}>💡 Valor por parcela: R$ {calcularValorParcela()}</Text>
+                        <Text style={styles.parcelaSubtext}>
+                          {formData.parcelas}x de R$ {calcularValorParcela()}
+                        </Text>
+                        <Text style={styles.parcelaNote}>
+                          📅 As parcelas serão distribuídas mensalmente a partir da data selecionada
+                        </Text>
+                      </View>
+                    )}
+                  </>
+                )}
+              </>
+            )}
           </>
         )}
 
@@ -277,7 +368,13 @@ export default function TransactionForm() {
           onPress={handleSubmit}
           disabled={loading}
         >
-          <Text style={styles.submitButtonText}>{loading ? "Salvando..." : "💾 Salvar Lançamento"}</Text>
+          <Text style={styles.submitButtonText}>
+            {loading
+              ? "Salvando..."
+              : formData.tipo === "saida" && formData.metodoPag === "Cartão de Crédito" && formData.parcelado
+                ? `💾 Salvar ${formData.parcelas}x Parcelas`
+                : "💾 Salvar Lançamento"}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -295,8 +392,14 @@ export default function TransactionForm() {
         visible={showMetodoModal}
         title="Selecionar Método de Pagamento"
         items={metodosPagamento}
-        selectedValue={formData.metodo_pagamento}
-        onSelect={(value) => setFormData({ ...formData, metodo_pagamento: value })}
+        selectedValue={formData.metodoPag}
+        onSelect={(value) =>
+          setFormData({
+            ...formData,
+            metodoPag: value,
+            parcelado: value === "Cartão de Crédito" ? formData.parcelado : false,
+          })
+        }
         onClose={() => setShowMetodoModal(false)}
       />
     </ScrollView>
@@ -377,6 +480,31 @@ const styles = StyleSheet.create({
   pickerArrow: {
     fontSize: 12,
     color: Colors.textSecondary,
+  },
+  // Estilos da informação de parcela
+  parcelaInfo: {
+    backgroundColor: Colors.primary + "10",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    borderLeftWidth: 4,
+    borderLeftColor: Colors.primary,
+  },
+  parcelaText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: Colors.primary,
+    marginBottom: 4,
+  },
+  parcelaSubtext: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginBottom: 8,
+  },
+  parcelaNote: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    fontStyle: "italic",
   },
   // Estilos do Modal
   modalOverlay: {

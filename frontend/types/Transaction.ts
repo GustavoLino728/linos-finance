@@ -1,19 +1,24 @@
 export interface Transaction {
+  email: string
   tipo: "entrada" | "saida"
-  descricao: string
+  desc: string
   valor: number
   data: string
   categoria?: string
-  metodo_pagamento?: string
+  metodoPag?: string
+  parcelado?: boolean
+  parcelas?: number
 }
 
 export interface TransactionFormData {
   tipo: "entrada" | "saida"
-  descricao: string
+  desc: string
   valor: string
   data: string
   categoria: string
-  metodo_pagamento: string
+  metodoPag: string
+  parcelado: boolean
+  parcelas: string
 }
 
 export interface ApiResponse {
