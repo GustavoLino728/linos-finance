@@ -72,6 +72,3 @@ def cadastrar_usuario(email, name, sheet_url):
         "sheet_url" : sheet_url
     }).execute()
     return response
-
-
-

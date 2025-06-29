@@ -1,107 +1,306 @@
+# Organização Financeira App
 
-# Organização Financeira App 💸
+> **Aplicativo PWA para controle financeiro pessoal com integração ao Google Sheets**
 
-Este é um projeto **pessoal e experimental**, desenvolvido com o objetivo de solucionar uma necessidade real minha: **organizar e registrar meus lançamentos financeiros** de forma simples e acessível.
 
-A proposta é integrar um aplicativo mobile com o Google Planilhas para permitir o controle total dos dados, aliado a um backend em Python — tudo construído por mim com o intuito de aprender e praticar tecnologias modernas, APIs e boas práticas de desenvolvimento fullstack.
 
----
 
-## ✨ Funcionalidades
 
-- Adição de lançamentos financeiros (entradas e saídas)
-- Envio dos dados diretamente para uma planilha Google Sheets
-- Integração simples, com interface limpa e funcional
-- Backend próprio que intermedeia as requisições com autenticação
+
+
+
+
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## **Sobre o Projeto**
 
-### 🔙 Backend — Python + Flask
-- **Python**: linguagem principal do backend
-- **Flask**: microframework para API REST
-- **gspread**: integração com Google Sheets
-- **google-auth**: autenticação com conta de serviço (service account)
-- **python-dotenv**: uso de variáveis de ambiente
-- **Supabase**: banco de dados usado para mapear o link da planilha de cada usuário (experimento com PostgreSQL via API)
+Este é um **projeto pessoal** desenvolvido por **Gustavo Lino** com o objetivo de treinar minhas experiências em desenvolvimento full-stack e resolver um problema real que muitos enfrentam: **a organização financeira pessoal**.
 
-### 📲 Frontend — React Native + Expo
-- **React Native**: para criar o aplicativo mobile
-- **Expo**: ferramenta para facilitar desenvolvimento e execução do app
-- **Fetch API**: para comunicação com a API Flask
-- **TypeScript**: adicionando tipagem ao projeto React Native
+### **Por que este app existe?**
 
----
+Como muitas pessoas, eu sempre tive dificuldades para:
 
-## 📚 Aprendizados
+- Controlar meus gastos mensais
+- Categorizar despesas de forma organizada
+- Ter uma visão clara de onde meu dinheiro estava sendo gasto
+- Manter dados financeiros sincronizados entre dispositivos
+- Acessar informações financeiras mesmo offline
 
-Esse projeto me ajudou a aprofundar conhecimentos práticos em:
 
-- Integração com **APIs do Google** (auth + planilhas)
-- Construção de **backends com Python e Flask**
-- Criação de **aplicativos mobile com React Native**
-- Organização do fluxo de dados entre frontend ↔ backend ↔ serviço externo (Google Sheets)
-- Uso de **variáveis de ambiente** e princípios básicos de segurança
-- Consumo e gerenciamento de dados via **Supabase** como banco de dados
-- Estruturação de um projeto **fullstack modular** (frontend + backend separados)
+A solução? Um aplicativo que integra com **Google Sheets** (que já uso para controle financeiro) e funciona tanto no **celular quanto no computador**, com suporte **offline completo**.
 
 ---
 
-## ▶️ Como executar
+## **Evolução do Projeto**
 
-### 🔧 Backend (Python) — Windows
+### **Ideia Inicial: React Native + Expo**
 
-1. Crie um ambiente virtual:
-   ```bash
-   python -m venv venv
-   ```
+- **Objetivo**: Criar um APK para Android
+- **Limitação**: Precisaria desenvolver separadamente para iOS
+- **Problema**: Duas bases de código diferentes para manter
 
-2. Ative o ambiente:
-   ```bash
-   .\venv\Scripts\activate
-   ```
 
-3. Instale as dependências:
-   ```bash
-   pip install -r requirements.txt
-   ```
+### **Solução Final: PWA (Progressive Web App)**
 
-4. Crie um arquivo `.env` na raiz do backend e insira suas variáveis:
-   ```
-   GOOGLE_CREDENTIALS=<sua_credencial_google_em_formato_JSON_escape>
-   SUPABASE_URL=<url>
-   SUPABASE_ANON_KEY=<chave>
-   ```
+- **Vantagem**: Funciona em **iPhone, Android e Desktop**
+- **Benefício**: Uma única base de código
+- **Resultado**: Experiência nativa em qualquer dispositivo
 
-5. Execute o servidor:
-   ```bash
-   python api.py
-   ```
 
 ---
 
-### 📱 Frontend (React Native com Expo) — Windows
+## **Funcionalidades**
 
-1. Instale o [Node.js](https://nodejs.org) (já inclui o npm)
-2. Instale as dependências:
-   ```bash
-   npm install
-   ```
+### **Autenticação**
 
-3. Inicie o projeto com Expo:
-   ```bash
-   npx expo start
-   ```
+- Cadastro com nome, email e link da planilha Google Sheets
+- Login persistente (não precisa logar toda vez)
+- Cada usuário tem sua planilha separada
 
-4. Abra o app com o Expo Go no seu celular ou em um emulador Android/iOS
+
+### **Lançamentos Financeiros**
+
+#### **📈 Entradas (Receitas)**
+
+- Descrição
+- Valor
+- Data (com DatePicker integrado)
+
+
+#### **📉 Saídas (Despesas)**
+
+- Descrição
+- Valor
+- Data
+- Categoria (modal com opções)
+- Método de Pagamento (modal com opções)
+- **Parcelamento inteligente**: Para cartão de crédito
+
+- Checkbox "Parcelado"
+- Input para número de parcelas
+- Backend divide automaticamente por mês
+
+
+
+
+
+### **Funcionalidades Offline**
+
+- **Funciona 100% offline** após primeira carga
+- Salva transações localmente quando sem internet
+- **Sincronização automática** quando volta online
+- Indicadores visuais de status de conexão
+- Cache inteligente de recursos
+
+
+### **Interface & UX**
+
+- **Modo escuro/claro** com toggle
+- Design responsivo (mobile-first)
+- Paleta de cores personalizada
+- Feedback visual para todas as ações
+- Experiência similar a app nativo
+
+
+### **Monitoramento**
+
+- Status de conexão com internet (Verde/Vermelho)
+- Status de conexão com backend (Conectado/Desconectado)
+- Contador de transações pendentes de sincronização
+- Botão de sincronização manual
+
 
 ---
 
-## 🙋‍♂️ Autor
+## ️ **Tecnologias Utilizadas**
 
-Desenvolvido por **Gustavo Lino** como projeto pessoal de aprendizado.
+### **🎯 Frontend (PWA)**
 
-Se quiser acompanhar minha evolução, estou sempre testando ideias e aprendendo coisas novas.
+| Tecnologia | Versão | Função
+|-----|-----|-----
+| **Next.js** | 14.0.4 | Framework React com SSR/SSG
+| **React** | 18.2.0 | Biblioteca para interfaces
+| **TypeScript** | 5.3.0 | Tipagem estática
+| **Tailwind CSS** | 3.3.6 | Framework CSS utility-first
+| **Lucide React** | 0.294.0 | Biblioteca de ícones
+
+
+### **📱 PWA & Offline**
+
+| Tecnologia | Função
+|-----|-----|-----
+| **Service Worker** | Cache offline e sincronização
+| **IndexedDB** | Banco de dados local
+| **Web App Manifest** | Instalação como app nativo
+| **Cache API** | Sistema de cache inteligente
+
+
+### **🔧 Backend**
+
+| Tecnologia | Função
+|-----|-----|-----
+| **Python Flask** | API REST
+| **Supabase** | Banco de dados (PostgreSQL)
+| **Google Sheets API** | Integração com planilhas
+| **Google OAuth2** | Autenticação com Google
+
+
+### **☁️ Deploy & Infraestrutura**
+
+| Serviço | Função
+|-----|-----|-----
+| **Render** | Hospedagem backend e frontend
+| **Supabase Cloud** | Banco de dados gerenciado
+| **Google Cloud** | APIs do Google Sheets
+
 
 ---
+
+## ️ **Arquitetura do Sistema**
+
+```plaintext
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend PWA  │    │   Backend API   │    │  Google Sheets  │
+│                 │    │                 │    │                 │
+│ • Next.js       │◄──►│ • Flask         │◄──►│ • Planilha User │
+│ • IndexedDB     │    │ • Supabase      │    │ • Aba Lançamentos│
+│ • Service Worker│    │ • Google API    │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │
+         ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐
+│ Cache Offline   │    │   Database      │
+│                 │    │                 │
+│ • Transações    │    │ • Usuários      │
+│ • Recursos      │    │ • Autenticação  │
+│ • Sincronização │    │                 │
+└─────────────────┘    └─────────────────┘
+```
+
+---
+
+## **Como Funciona**
+
+### **1. Cadastro & Setup**
+
+1. Usuário cria conta com email e nome
+2. Fornece link da planilha Google Sheets
+3. Backend configura acesso à planilha específica
+
+
+### **2. Lançamentos Online**
+
+1. Usuário registra entrada/saída no app
+2. Dados são enviados para o backend
+3. Backend processa e salva na planilha Google Sheets
+4. Confirmação visual no app
+
+
+### **3. Modo Offline**
+
+1. App detecta perda de conexão
+2. Transações são salvas no IndexedDB local
+3. Interface mostra status "offline"
+4. Contador de transações pendentes
+
+
+### **4. Sincronização**
+
+1. App detecta retorno da conexão
+2. Sincronização automática das transações pendentes
+3. Dados são enviados para o backend
+4. Limpeza do cache local após confirmação
+
+
+---
+
+## **Como Executar**
+
+### **Pré-requisitos**
+
+- Node.js 18+
+- Python 3.8+
+- Conta no Supabase
+- Projeto no Google Cloud Console
+
+
+### **Backend**
+
+```shellscript
+cd backend/
+pip install -r requirements.txt
+python api.py
+```
+
+### **Frontend**
+
+```shellscript
+cd frontend/
+npm install --legacy-peer-deps
+npm run dev
+```
+
+
+---
+
+## **Objetivos de Aprendizado**
+
+Este projeto me permitiu praticar e aprender:
+
+
+### **Backend**
+
+- ✅ Flask para APIs REST
+- ✅ Integração com Google Sheets API
+- ✅ Supabase como BaaS
+- ✅ Autenticação e autorização
+- ✅ CORS e segurança web
+
+
+### **DevOps & Deploy**
+
+- ✅ Deploy em produção (Render)
+- ✅ Configuração de domínios
+- ✅ Variáveis de ambiente
+- ✅ Monitoramento de aplicações
+
+
+---
+
+## **Próximas Funcionalidades**
+
+- Dashboard com gráficos e analytics
+- Orçamento por categoria com alertas
+- Transações recorrentes automáticas
+- Notificações push inteligentes
+- Exportação de relatórios em PDF
+- Metas financeiras e acompanhamento
+
+
+---
+
+## **Licença**
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
+
+## ‍ **Autor**
+
+**Gustavo Lino**
+
+- 💼 Desenvolvedor Backend
+- 🎯 Foco em resolver problemas reais com tecnologia
+- 📧 gustavoaraujoln728@gmail.com
+- 🔗 Linkedin
+- 🐙 [Seu GitHub]
+
+
+---
+
+<div>**⭐ Se este projeto te ajudou, considere dar uma estrela!**
+
+*Desenvolvido com ❤️ por Gustavo Lino*
+
+</div>

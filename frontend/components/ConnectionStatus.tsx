@@ -1,125 +1,46 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native"
-import { Colors } from "../constants/Colors"
-import { ApiService } from "../services/api"
-import { ENV } from "../config/environment"
+import { useOffline } from "@/contexts/OfflineContext"
+import { Wifi, WifiOff, Server, ServerOff, FolderSyncIcon as Sync, Clock } from "lucide-react"
 
 export default function ConnectionStatus() {
-  const [status, setStatus] = useState<{
-    connected: boolean
-    latency?: number
-    environment: string
-    lastCheck: Date
-  }>({
-    connected: false,
-    environment: ENV.ENVIRONMENT,
-    lastCheck: new Date(),
-  })
-
-  const [isChecking, setIsChecking] = useState(false)
-
-  const checkConnection = async () => {
-    setIsChecking(true)
-    const startTime = Date.now()
-
-    try {
-      const healthCheck = await ApiService.healthCheck()
-
-      setStatus({
-        connected: healthCheck.status === "healthy",
-        latency: healthCheck.latency,
-        environment: ENV.ENVIRONMENT,
-        lastCheck: new Date(),
-      })
-    } catch (error) {
-      setStatus((prev) => ({
-        ...prev,
-        connected: false,
-        lastCheck: new Date(),
-      }))
-    } finally {
-      setIsChecking(false)
-    }
-  }
-
-  useEffect(() => {
-    checkConnection()
-
-    // Verificar conexão a cada 30 segundos em produção
-    const interval = setInterval(checkConnection, ENV.ENVIRONMENT === "production" ? 30000 : 10000)
-
-    return () => clearInterval(interval)
-  }, [])
-
-  const getStatusColor = () => {
-    if (isChecking) return Colors.warning
-    return status.connected ? Colors.success : Colors.error
-  }
-
-  const getStatusText = () => {
-    if (isChecking) return "Verificando..."
-
-    if (status.connected) {
-      const latencyText = status.latency ? ` (${status.latency}ms)` : ""
-      return `Conectado${latencyText}`
-    }
-
-    return "Desconectado"
-  }
+  const { isOnline, isBackendConnected, pendingTransactions, syncTransactions } = useOffline()
 
   return (
-    <TouchableOpacity style={styles.container} onPress={checkConnection} disabled={isChecking}>
-      <View style={styles.content}>
-        <View style={[styles.dot, { backgroundColor: getStatusColor() }]} />
-        <Text style={styles.statusText}>{getStatusText()}</Text>
-        <Text style={styles.environmentText}>{status.environment.toUpperCase()}</Text>
-      </View>
-      <Text style={styles.lastCheck}>Última verificação: {status.lastCheck.toLocaleTimeString()}</Text>
-    </TouchableOpacity>
+    <div className="flex items-center space-x-4">
+      {/* Status da Internet */}
+      <div
+        className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs ${
+          isOnline ? "bg-success/10 text-success" : "bg-error/10 text-error"
+        }`}
+      >
+        {isOnline ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+        <span>{isOnline ? "Online" : "Offline"}</span>
+      </div>
+
+      {/* Status do Backend */}
+      <div
+        className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs ${
+          isBackendConnected ? "bg-success/10 text-success" : "bg-error/10 text-error"
+        }`}
+      >
+        {isBackendConnected ? <Server className="w-3 h-3" /> : <ServerOff className="w-3 h-3" />}
+        <span>{isBackendConnected ? "Conectado" : "Desconectado"}</span>
+      </div>
+
+      {/* Transações Pendentes */}
+      {pendingTransactions > 0 && (
+        <button
+          onClick={syncTransactions}
+          className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs bg-warning/10 text-warning hover:bg-warning/20 transition-colors"
+        >
+          <Clock className="w-3 h-3" />
+          <span>
+            {pendingTransactions} pendente{pendingTransactions > 1 ? "s" : ""}
+          </span>
+          <Sync className="w-3 h-3" />
+        </button>
+      )}
+    </div>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Colors.surface,
-    margin: 8,
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  content: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 4,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 8,
-  },
-  statusText: {
-    fontSize: 14,
-    color: Colors.text,
-    fontWeight: "600",
-    marginRight: 8,
-  },
-  environmentText: {
-    fontSize: 10,
-    color: Colors.textSecondary,
-    backgroundColor: Colors.border,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    fontWeight: "bold",
-  },
-  lastCheck: {
-    fontSize: 10,
-    color: Colors.textSecondary,
-    textAlign: "center",
-  },
-})
