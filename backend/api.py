@@ -5,7 +5,7 @@ from flask import request, jsonify, Flask
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, origins=["https://organizacao-financeira-app-frontend.onrender.com", "http://localhost:3000"],
+CORS(app, origins=["organizacao-financeira-app.vercel.app", "http://localhost:3000"],
      methods=['GET', 'POST', 'OPTIONS'],
      allow_headers=['Content-Type', 'Authorization'])
 
