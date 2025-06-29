@@ -5,10 +5,8 @@ from flask import request, jsonify, Flask
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, origins=[
-    "http://192.168.56.1:5000",
-    "https://organizacao-financeira-app-frontend.onrender.com/"
-])
+CORS(app, resources={r"/*": {"origins": "https://organizacao-financeira-app-frontend.onrender.com"}})
+
 
 @app.route('/add-lancamento', methods=['POST'])
 def add_lancamento():
