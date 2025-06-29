@@ -23,9 +23,6 @@ export class ApiService {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          // Headers para CORS em produção
-          "Access-Control-Allow-Origin": "*",
-          ...options.headers,
         },
       })
 

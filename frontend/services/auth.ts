@@ -20,9 +20,6 @@ export class AuthService {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          // Headers para CORS
-          "Access-Control-Allow-Origin": "*",
-          ...options.headers,
         },
       })
 
