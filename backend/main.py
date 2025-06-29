@@ -16,9 +16,14 @@ SCOPES = [
 
 credentials_json = os.getenv("GOOGLE_CREDENTIALS")
 if isinstance(credentials_json, str):
-    credentials_dict = json.loads(credentials_json)
+    try:
+        credentials_dict = json.loads(credentials_json)
+        if isinstance(credentials_dict, str):
+            credentials_dict = json.loads(credentials_dict)
+    except Exception as e:
+        raise ValueError(f"Erro ao carregar GOOGLE_CREDENTIALS: {e}")
 else:
-    credentials_dict = credentials_json
+    raise TypeError("GOOGLE_CREDENTIALS precisa ser uma string JSON")
 credentials_dict["private_key"] = credentials_dict["private_key"].replace("\\n", "\n")
 credentials = Credentials.from_service_account_info(credentials_dict, scopes=SCOPES)
 
