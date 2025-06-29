@@ -9,6 +9,9 @@ CORS(app, origins=["https://organizacao-financeira-app-frontend.onrender.com", "
      methods=['GET', 'POST', 'OPTIONS'],
      allow_headers=['Content-Type', 'Authorization'])
 
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({"message": "API funcionando", "status": "ok"}), 200
 
 @app.route('/add-lancamento', methods=['POST'])
 def add_lancamento():
