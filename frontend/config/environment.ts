@@ -10,24 +10,7 @@ export interface EnvironmentConfig {
 
 // Detectar ambiente
 const getEnvironment = (): "development" | "staging" | "production" => {
-  // Para React Native
-  const isReactNative = typeof window === "undefined"
-  const devMode = isReactNative ? process.env.NODE_ENV === "development" : false
-
-  if (isReactNative) {
-    return devMode ? "development" : "production"
-  }
-
-  // Para Web/PWA
-  const hostname = window.location.hostname
-
-  if (hostname === "localhost" || hostname === "127.0.0.1") {
-    return "development"
-  } else if (hostname.includes("staging") || hostname.includes("preview")) {
-    return "staging"
-  } else {
-    return "production"
-  }
+  return "production"
 }
 
 // Configurações por ambiente
