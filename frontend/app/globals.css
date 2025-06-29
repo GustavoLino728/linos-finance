@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #2c7be5;
+  --secondary: #5f63f2;
+  --background-light: #f7f9fc;
+  --background-dark: #1a1a2e;
+  --text-primary: #1e1e1e;
+  --text-secondary: #6b7280;
+  --success: #22c55e;
+  --error: #ef4444;
+  --warning: #facc15;
+  --neutral: #d1d5db;
+}
+
+.dark {
+  --text-primary: #f7f9fc;
+  --background-light: #1a1a2e;
+}
+
+body {
+  background-color: var(--background-light);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-background-dark dark:border-gray-600 dark:text-text-primary-dark;
+  }
+
+  .card {
+    @apply bg-white dark:bg-background-dark rounded-lg shadow-md p-6 border border-neutral dark:border-gray-600;
+  }
+}
