@@ -28,7 +28,6 @@ credentials_dict["private_key"] = credentials_dict["private_key"].replace("\\n",
 credentials = Credentials.from_service_account_info(credentials_dict, scopes=SCOPES)
 
 def obter_planilha(email):
-    # Buscar no Supabase
     resposta = supabase.table("users").select("sheet_url").eq("email", email).single().execute()
     if resposta.data is None:
         raise Exception("Usuário não encontrado")
@@ -39,7 +38,6 @@ def obter_planilha(email):
     else:
         raise Exception("Link da planilha inválido")
 
-    # Autorizar e abrir a aba Lançamentos
     gc = gspread.authorize(credentials)
     worksheet = gc.open_by_key(planilha_id).worksheet("Lançamentos")
     return worksheet
@@ -60,11 +58,32 @@ def inserir_lancamento(email, data, tipo, desc, valor, categoria="", metodoPag="
             for i in range(int(parcelas)):
                 data_parcela = (data_base + relativedelta(months=i)).strftime("%Y-%m-%d")
                 linha = [data_parcela, tipo, f"{desc} ({i+1}/{parcelas})", valor_parcela, categoria, metodoPag]
-                worksheet.append_row(linha)
+            worksheet.append_row(linha)
     else:
         lista_lancamento = [data, tipo, desc, valor, categoria, metodoPag]
         worksheet.append_row(lista_lancamento)
     
+def salvar_favorito(email, tipo, desc, valor, categoria="", metodoPag=""):
+    tipo = tipo.lower()
+    if tipo == 'entrada':
+        favorito = supabase.table("favorites").insert({
+            "email" : email,
+            "type" : tipo,
+            "description" : desc,
+            "value" : valor
+        }).execute
+    else:
+        favorito = supabase.table("favorites").insert({
+            "email" : email,
+            "type" : tipo,
+            "description" : desc,
+            "value" : valor,
+            "category" : categoria,
+            "payment_method" : metodoPag
+        }).execute()
+    return favorito
+
+
 def cadastrar_usuario(email, name, sheet_url):
     response = supabase.table("users").insert({
         "email" : email,
