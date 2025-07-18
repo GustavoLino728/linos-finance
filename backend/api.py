@@ -31,7 +31,7 @@ def add_lancamento():
 @app.route('/cadastrar', methods=['POST'])
 def cadastrar_planilha():
     dados = request.get_json()
-    email = autenticar_usuario()
+    email = dados['email']
     name = dados['name']
     sheet_url = dados['sheet_url']
 
@@ -44,7 +44,7 @@ def cadastrar_planilha():
 @app.route('/login', methods=['POST'])
 def login():
     dados = request.get_json()
-    email = autenticar_usuario()
+    email = dados['email']
 
     response = supabase.table("users").select("id, email, name, sheet_url").eq("email", email).execute()
     if response.data:
@@ -73,7 +73,7 @@ def salvar_favorito():
 @app.route('/favoritos', methods=['GET'])
 def mostrar_favorito():
     email = autenticar_usuario()
-    resposta = (supabase.table("favorites").select("type, description, value, category, payment_method").eq("user_email", email).execute() )
+    resposta = (supabase.table("favorites").select("id,type, description, value, category, payment_method").eq("user_email", email).execute() )
     return jsonify({"mensagem" : "Listando Favoritos do Usuario", "resposta" : resposta.data}),200
 
 @app.route('/favoritos/<id>', methods=['DELETE'])

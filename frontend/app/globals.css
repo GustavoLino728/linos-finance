@@ -2,44 +2,192 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --primary: #2c7be5;
-  --secondary: #5f63f2;
-  --background-light: #f7f9fc;
-  --background-dark: #1a1a2e;
-  --text-primary: #1e1e1e;
-  --text-secondary: #6b7280;
-  --success: #22c55e;
-  --error: #ef4444;
-  --warning: #facc15;
-  --neutral: #d1d5db;
+/* Reset e configurações base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.dark {
-  --text-primary: #f7f9fc;
-  --background-light: #1a1a2e;
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background-color: var(--background-light);
-  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-@layer components {
-  .btn-primary {
-    @apply bg-primary text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity;
-  }
+/* Variáveis CSS para Light Mode */
+:root {
+  --color-primary: #2e7d32;
+  --color-primary-light: #4caf50;
+  --color-primary-dark: #1b5e20;
+  --color-secondary: #f9a825;
+  --color-secondary-light: #ffc107;
+  --color-secondary-dark: #f57c00;
+  --color-background: #fafafa;
+  --color-surface: #ffffff;
+  --color-surface-variant: #f5f5f5;
+  --color-text-primary: #1c1c1c;
+  --color-text-secondary: #4f4f4f;
+  --color-border: #e0e0e0;
+  --color-border-light: #f0f0f0;
+  --color-error: #d32f2f;
+  --color-error-light: #ef5350;
+  --color-success: #388e3c;
+  --color-success-light: #66bb6a;
+  --color-accent: #e8f5e8;
+  --color-accent-secondary: #fff8e1;
 
-  .btn-secondary {
-    @apply bg-secondary text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity;
-  }
+  /* Variáveis shadcn */
+  --background: 250 250 250;
+  --foreground: 28 28 28;
+  --card: 255 255 255;
+  --card-foreground: 28 28 28;
+  --popover: 255 255 255;
+  --popover-foreground: 28 28 28;
+  --primary: 46 125 50;
+  --primary-foreground: 255 255 255;
+  --secondary: 249 168 37;
+  --secondary-foreground: 28 28 28;
+  --muted: 245 245 245;
+  --muted-foreground: 79 79 79;
+  --accent: 232 245 232;
+  --accent-foreground: 28 28 28;
+  --destructive: 211 47 47;
+  --destructive-foreground: 255 255 255;
+  --border: 224 224 224;
+  --input: 224 224 224;
+  --ring: 46 125 50;
+  --radius: 0.75rem;
+}
 
-  .input-field {
-    @apply w-full px-3 py-2 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-background-dark dark:border-gray-600 dark:text-text-primary-dark;
-  }
+/* Variáveis CSS para Dark Mode */
+[data-theme="dark"] {
+  --color-primary: #81c784;
+  --color-primary-light: #a5d6a7;
+  --color-primary-dark: #4caf50;
+  --color-secondary: #ffd54f;
+  --color-secondary-light: #fff176;
+  --color-secondary-dark: #ffb300;
+  --color-background: #121212;
+  --color-surface: #1e1e1e;
+  --color-surface-variant: #2a2a2a;
+  --color-text-primary: #fafafa;
+  --color-text-secondary: #bdbdbd;
+  --color-border: #333333;
+  --color-border-light: #404040;
+  --color-error: #ef9a9a;
+  --color-error-light: #ffcdd2;
+  --color-success: #a5d6a7;
+  --color-success-light: #c8e6c9;
+  --color-accent: #1a3d1a;
+  --color-accent-secondary: #2d2416;
 
-  .card {
-    @apply bg-white dark:bg-background-dark rounded-lg shadow-md p-6 border border-neutral dark:border-gray-600;
+  /* Variáveis shadcn dark */
+  --background: 18 18 18;
+  --foreground: 250 250 250;
+  --card: 30 30 30;
+  --card-foreground: 250 250 250;
+  --popover: 30 30 30;
+  --popover-foreground: 250 250 250;
+  --primary: 129 199 132;
+  --primary-foreground: 18 18 18;
+  --secondary: 255 213 79;
+  --secondary-foreground: 18 18 18;
+  --muted: 42 42 42;
+  --muted-foreground: 189 189 189;
+  --accent: 26 61 26;
+  --accent-foreground: 250 250 250;
+  --destructive: 239 154 154;
+  --destructive-foreground: 18 18 18;
+  --border: 51 51 51;
+  --input: 51 51 51;
+  --ring: 129 199 132;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+}
+
+/* Utilitários globais */
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Animações */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Responsividade */
+@media (min-width: 768px) {
+  .container {
+    max-width: 600px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 800px;
   }
 }

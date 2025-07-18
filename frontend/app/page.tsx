@@ -1,28 +1,34 @@
 "use client"
-
 import { useAuth } from "@/contexts/AuthContext"
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-import Dashboard from "@/components/Dashboard"
-import LoadingSpinner from "@/components/LoadingSpinner"
+import { AuthScreen } from "@/components/auth/AuthScreen"
+import { MainLayout } from "@/components/layout/MainLayout"
+import { Card, CardHeader, CardContent } from "@/components/ui/Card"
+import styles from "./page.module.css"
 
 export default function Home() {
-  const { user, isLoading } = useAuth()
-  const router = useRouter()
+  const { user, loading } = useAuth()
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push("/login")
-    }
-  }, [user, isLoading, router])
-
-  if (isLoading) {
-    return <LoadingSpinner />
+  if (loading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <Card className={styles.loadingCard}>
+          <CardHeader>
+            <h1 className={styles.loadingLogo}>Lino$</h1>
+            <p className={styles.loadingText}>Carregando aplicação...</p>
+          </CardHeader>
+          <CardContent>
+            <div className={styles.loadingSpinner}>
+              <div className={styles.spinner} />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
-  if (!user) {
-    return null
+  if (user) {
+    return <MainLayout />
   }
 
-  return <Dashboard />
+  return <AuthScreen />
 }

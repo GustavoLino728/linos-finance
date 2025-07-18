@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useEffect, useState } from "react"
 
 interface User {
   id: string
@@ -11,60 +11,108 @@ interface User {
 
 interface AuthContextType {
   user: User | null
-  login: (email: string) => Promise<boolean>
-  logout: () => void
-  isLoading: boolean
+  loading: boolean
+  signIn: (email: string) => Promise<void>
+  signUp: (email: string, name: string, sheetUrl: string) => Promise<void>
+  signOut: () => Promise<void>
+  getAuthToken: () => Promise<string | null>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [loading, setLoading] = useState(true)
+
+  // Simulação de token para MVP
+  const getAuthToken = async () => {
+    const email = localStorage.getItem("linos_user_email")
+    return email ? `mock_token_${email}` : null
+  }
+
+  const signIn = async (email: string) => {
+    setLoading(true)
+    try {
+      // Simulação de login - apenas salva o email
+      localStorage.setItem("linos_user_email", email)
+
+      // Simula busca do usuário
+      const mockUser: User = {
+        id: `user_${email.replace("@", "_").replace(".", "_")}`,
+        email: email,
+        sheet_url: "https://docs.google.com/spreadsheets/mock",
+      }
+
+      setUser(mockUser)
+    } catch (error) {
+      throw new Error("Erro ao fazer login")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const signUp = async (email: string, name: string, sheetUrl: string) => {
+    setLoading(true)
+    try {
+      // Simulação de cadastro
+      localStorage.setItem("linos_user_email", email)
+      localStorage.setItem("linos_user_name", name)
+      localStorage.setItem("linos_user_sheet", sheetUrl)
+
+      const mockUser: User = {
+        id: `user_${email.replace("@", "_").replace(".", "_")}`,
+        email: email,
+        sheet_url: sheetUrl,
+      }
+
+      setUser(mockUser)
+    } catch (error) {
+      throw new Error("Erro ao criar conta")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const signOut = async () => {
+    localStorage.removeItem("linos_user_email")
+    localStorage.removeItem("linos_user_name")
+    localStorage.removeItem("linos_user_sheet")
+    setUser(null)
+  }
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("user")
-    if (savedUser) {
-      setUser(JSON.parse(savedUser))
+    const email = localStorage.getItem("linos_user_email")
+    if (email) {
+      const mockUser: User = {
+        id: `user_${email.replace("@", "_").replace(".", "_")}`,
+        email: email,
+        sheet_url: localStorage.getItem("linos_user_sheet") || "https://docs.google.com/spreadsheets/mock",
+      }
+      setUser(mockUser)
     }
-    setIsLoading(false)
+    setLoading(false)
   }, [])
 
-  const login = async (email: string): Promise<boolean> => {
-    try {
-      const response = await fetch("https://organizacao-financeira-app.onrender.com/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      })
-
-      if (response.ok) {
-        const userData = await response.json()
-        setUser(userData)
-        localStorage.setItem("user", JSON.stringify(userData))
-        return true
-      }
-      return false
-    } catch (error) {
-      console.error("Erro no login:", error)
-      return false
-    }
-  }
-
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem("user")
-  }
-
-  return <AuthContext.Provider value={{ user, login, logout, isLoading }}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        signIn,
+        signUp,
+        signOut,
+        getAuthToken,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider")
+  if (!context) {
+    throw new Error("useAuth deve ser usado dentro de AuthProvider")
   }
   return context
 }

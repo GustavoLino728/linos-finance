@@ -1,0 +1,94 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background-color: var(--color-border);
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.tab {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: transparent;
+  color: var(--color-text-secondary);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.tabActive {
+  background-color: var(--color-background);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tabEntrada.tabActive {
+  color: var(--color-success);
+}
+
+.tabSaida.tabActive {
+  color: var(--color-error);
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.selectButton {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.buttonGroup button {
+  flex: 1;
+}
+
+.modalOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.optionButton {
+  justify-content: flex-start;
+  text-align: left;
+  color: var(--color-text-primary);
+  transition: all 0.2s ease;
+}
+
+.optionButton:hover {
+  background-color: var(--color-border-light);
+  color: var(--color-text-primary);
+  transform: translateX(4px);
+}
+
+[data-theme="dark"] .optionButton:hover {
+  background-color: var(--color-border);
+  color: var(--color-text-primary);
+}
