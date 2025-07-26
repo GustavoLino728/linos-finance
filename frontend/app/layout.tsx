@@ -1,18 +1,20 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { ThemeProvider } from "../contexts/ThemeContext"
+import { AuthProvider } from "../contexts/AuthContext"
 import "./globals.css"
-import { AuthProvider } from "@/contexts/AuthContext"
-import { ThemeProvider } from "@/contexts/ThemeContext"
-import { OfflineProvider } from "@/contexts/OfflineContext"
-
-const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Organização Financeira",
-  description: "Aplicativo de controle financeiro pessoal",
+  title: "Lino$ Finance",
+  description: "Aplicativo de finanças pessoais",
   manifest: "/manifest.json",
-  themeColor: "#2C7BE5",
+  themeColor: "#2E7D32",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Lino$",
+  },
     generator: 'v0.dev'
 }
 
@@ -23,11 +25,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className={inter.className}>
+      <head>
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/icon-192x192.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+      </head>
+      <body>
         <ThemeProvider>
-          <AuthProvider>
-            <OfflineProvider>{children}</OfflineProvider>
-          </AuthProvider>
+          <AuthProvider>{children}</AuthProvider>
         </ThemeProvider>
       </body>
     </html>
