@@ -1,4 +1,4 @@
-from main import inserir_lancamento, cadastrar_usuario, salvar_favorito as salvar_favorito_func
+from main import inserir_lancamento, cadastrar_usuario, buscar_saldo, salvar_favorito as salvar_favorito_func
 from supabaseClient import supabase
 from flask import request, jsonify, Flask
 from flask_cors import CORS
@@ -115,8 +115,32 @@ def editar_favorito(id):
         return jsonify({"mensagem": "Favorito editado com sucesso!", "resposta" : newFavorito }), 200
     else:
         return jsonify({"mensagem": "Favorito não encontrado ou não pertence ao usuário"}), 404
+    
+@app.route('/saldo', methods=['GET'])
+def checkar_saldo():
+    email = request.args.get('email')
+    if not email:
+        return jsonify({"erro": "Parâmetro 'email' é obrigatório"}), 400
+
+    saldo_atual = buscar_saldo(email)
+    return jsonify({
+        "mensagem": "Saldo resgatado com sucesso!",
+        "saldo": saldo_atual
+    }), 200
 
 
+@app.route("/alexa", methods=["POST"])
+def alexa_mock():
+    return jsonify({
+        "version": "1.0",
+        "response": {
+            "outputSpeech": {
+                "type": "PlainText",
+                "text": "Oi, estou funcionando!"
+            },
+            "shouldEndSession": False
+        }
+    })
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)
