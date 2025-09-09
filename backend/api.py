@@ -1,4 +1,4 @@
-from main import inserir_lancamento, cadastrar_usuario, buscar_saldo, salvar_favorito as salvar_favorito_func
+from main import inserir_lancamento, cadastrar_usuario, get_balance, salvar_favorito as salvar_favorito_func
 from supabaseClient import supabase
 from flask import request, jsonify, Flask
 from flask_cors import CORS
@@ -21,43 +21,10 @@ def add_transaction():
                       data.get('categoria', ""), data.get('metodoPag', ""),
                       data.get('parcelado', False), data.get('parcelas', 1))
     return jsonify({"mensagem": "Lançamento adicionado com sucesso"}), 201
-
-
-@app.route('/register', methods=['POST'])
-def register_user():
-    data = request.get_json()
-    email = data['email']
-    name = data['name']
-    sheet_url = data['sheet_url']
-
-    if not email or not sheet_url:
-        return jsonify({"erro": "Email e link da planilha são obrigatórios"}), 400
-
-    existe = supabase.table("users").select("id").eq("email", email).execute()
-    if existe.data:
-        return jsonify({"erro": "Usuário já cadastrado"}), 409
-
-    resposta = cadastrar_usuario(email, name, sheet_url)
-    return jsonify({"mensagem": "Usuário cadastrado", "resposta": resposta.data}), 201
-
-@app.route('/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    email = data['email']
-
-    response = supabase.table("users").select("id, email, name, sheet_url").eq("email", email).execute()
-    if response.data:
-        usuario = response.data[0]
-        return jsonify({
-            "id": usuario["id"],
-            "email": usuario["email"],
-            "sheet_url": usuario["sheet_url"]
-        }), 200
-    else:
-        return jsonify({"erro": "Usuário não encontrado"}), 404
+    
 
 @app.route('/favorites', methods=['POST'])
-def rota_salvar_favorito():
+def create_favorites():
     data = request.get_json()
     email = data['email']
     tipo = data['tipo']
@@ -66,34 +33,34 @@ def rota_salvar_favorito():
     categoria = data.get('categoria', "")
     metodoPag = data.get('metodoPag', "")
 
-    resposta = salvar_favorito_func(email, tipo, desc, valor, categoria, metodoPag)
-    return jsonify({"mensagem" : "Salvo com sucesso!", "resposta": resposta.data}), 201
+    response = salvar_favorito_func(email, tipo, desc, valor, categoria, metodoPag)
+    return jsonify({"mensagem" : "Salvo com sucesso!", "response": response.data}), 201
 
 @app.route('/favorites', methods=['GET'])
-def mostrar_favorito():
+def read_favorites():
     email = request.args.get('email') 
     if not email:
         return jsonify({"erro": "Parâmetro 'email' é obrigatório"}), 400
-    resposta = supabase.table("favorites").select("id,type, description, value, category, payment_method").eq("user_email", email).execute()
-    return jsonify({"mensagem" : "Listando Favoritos do Usuario", "resposta" : resposta.data}),200
+    response = supabase.table("favorites").select("id,type, description, value, category, payment_method").eq("user_email", email).execute()
+    return jsonify({"mensagem" : "Listando Favoritos do Usuario", "response" : response.data}),200
 
 @app.route('/favorites/<id>', methods=['DELETE'])
-def deletar_favorito(id):
+def delete_favorites(id):
     data = request.get_json()
     email = data['email']
-    consulta = supabase.table('favorites').select("id").eq("user_email", email).eq("id", id).execute()
-    if consulta.data:
+    query = supabase.table('favorites').select("id").eq("user_email", email).eq("id", id).execute()
+    if query.data:
         supabase.table('favorites').delete().eq("id", id).eq("user_email", email).execute()
     else:
         return jsonify({"erro": "Favorito não encontrado ou não pertence ao usuário"}), 404
     return jsonify({"mensagem" : "Favorito deletado com sucesso"})
 
 @app.route('/favorites/<id>', methods=['PATCH'])
-def editar_favorito(id):
+def updata_favorites(id):
     data = request.get_json()
     email = data['email']
-    consulta = supabase.table('favorites').select("id").eq("id", id).eq("user_email", email).execute()
-    if consulta.data:
+    query = supabase.table('favorites').select("id").eq("id", id).eq("user_email", email).execute()
+    if query.data:
         data = request.get_json()
         desc = data['desc']
         tipo = data['tipo']
@@ -108,20 +75,20 @@ def editar_favorito(id):
             "category": categoria,
             "payment_method": metodoPag
         }).eq('user_email', email).eq('id', id).execute()
-        return jsonify({"mensagem": "Favorito editado com sucesso!", "resposta" : newFavorito }), 200
+        return jsonify({"mensagem": "Favorito editado com sucesso!", "response" : newFavorito }), 200
     else:
         return jsonify({"mensagem": "Favorito não encontrado ou não pertence ao usuário"}), 404
     
-@app.route('/saldo', methods=['GET'])
-def checkar_saldo():
+@app.route('/balance', methods=['GET'])
+def check_balance():
     email = request.args.get('email')
     if not email:
         return jsonify({"erro": "Parâmetro 'email' é obrigatório"}), 400
 
-    saldo_atual = buscar_saldo(email)
+    balance_atual = get_balance(email)
     return jsonify({
-        "mensagem": "Saldo resgatado com sucesso!",
-        "saldo": saldo_atual
+        "mensagem": "balance resgatado com sucesso!",
+        "balance": balance_atual
     }), 200
 
 

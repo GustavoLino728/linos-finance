@@ -91,7 +91,7 @@ def cadastrar_usuario(email, name, sheet_url):
     }).execute()
     return response
 
-def buscar_saldo(email):
+def get_balance(email):
     worksheet = obter_planilha(email)
-    saldo = worksheet.acell('B10').value
-    return saldo
+    balance = worksheet.acell('B10').value
+    return balance
