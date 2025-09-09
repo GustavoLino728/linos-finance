@@ -36,7 +36,7 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
     setMessage("")
 
     try {
-      const response = await apiRequest("/add-lancamento", {
+      const response = await apiRequest("/transactions", {
         method: "POST",
         body: JSON.stringify({
           data: formData.data,
@@ -79,7 +79,7 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
     setMessage("")
 
     try {
-      const response = await apiRequest("/favoritos", {
+      const response = await apiRequest("/favorites", {
         method: "POST",
         body: JSON.stringify({
           tipo: activeTab,

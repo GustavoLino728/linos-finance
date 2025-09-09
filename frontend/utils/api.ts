@@ -8,8 +8,7 @@ export const apiRequest = async (endpoint: string, options: RequestInit = {}) =>
   const userData = localStorage.getItem("user_data")
   const isMockUser = token === "mock_token_123"
 
-  // Se for usuário mock e não for login/cadastro, usar mock API
-  if (isMockUser && !endpoint.includes("/login") && !endpoint.includes("/cadastrar")) {
+  if (isMockUser && !endpoint.includes("/login") && !endpoint.includes("/register")) {
     console.log("Using mock API for:", endpoint)
     return mockApiRequest(endpoint, options)
   }
@@ -33,17 +32,17 @@ export const apiRequest = async (endpoint: string, options: RequestInit = {}) =>
   }
 
   // Tratar GET requests de forma especial
-  if (options.method === "GET" && userData && !endpoint.includes("/login") && !endpoint.includes("/cadastrar")) {
+  if (options.method === "GET" && userData && !endpoint.includes("/login") && !endpoint.includes("/register")) {
     const user = JSON.parse(userData)
 
-    // Para GET /favoritos, adicionar email na query string
-    if (endpoint === "/favoritos") {
-      url = `${API_BASE_URL}/favoritos?email=${encodeURIComponent(user.email)}`
+    // Para GET /favorites, adicionar email na query string
+    if (endpoint === "/favorites") {
+      url = `${API_BASE_URL}/favorites?email=${encodeURIComponent(user.email)}`
     }
 
     // Para GET, não enviar body
     delete options.body
-  } else if (userData && !endpoint.includes("/login") && !endpoint.includes("/cadastrar")) {
+  } else if (userData && !endpoint.includes("/login") && !endpoint.includes("/register")) {
     // Para outros métodos (POST, DELETE, PATCH), adicionar email ao body
     const user = JSON.parse(userData)
     bodyData = { ...bodyData, email: user.email }
@@ -63,7 +62,7 @@ export const apiRequest = async (endpoint: string, options: RequestInit = {}) =>
       mode: "cors",
     }
 
-    // Só adicionar body se não for GET e tiver dados
+    // Só adicionar body se não for GET e tiver data
     if (options.method !== "GET" && Object.keys(bodyData).length > 0) {
       requestOptions.body = JSON.stringify(bodyData)
     }

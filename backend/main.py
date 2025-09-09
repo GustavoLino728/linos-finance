@@ -69,18 +69,18 @@ def inserir_lancamento(email, data, tipo, desc, valor, categoria="", metodoPag="
 
 def salvar_favorito(email, tipo, desc, valor, categoria="", metodoPag=""):
     tipo = tipo.lower()
-    dados = {
+    data = {
         "user_email": email,
         "type": tipo,
         "description": desc,
         "value": valor
     }
     if tipo != 'entrada':
-        dados.update({
+        data.update({
             "category": categoria,
             "payment_method": metodoPag
         })
-    favorito = supabase.table("favorites").insert(dados).execute()
+    favorito = supabase.table("favorites").insert(data).execute()
     return favorito
 
 def cadastrar_usuario(email, name, sheet_url):

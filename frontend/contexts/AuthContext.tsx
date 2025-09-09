@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (response.ok) {
         const userData = await response.json()
-        console.log("Dados do usuário recebidos:", userData)
+        console.log("data do usuário recebidos:", userData)
 
         setUser(userData)
         localStorage.setItem("user_data", JSON.stringify(userData))

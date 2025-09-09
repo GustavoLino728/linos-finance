@@ -33,7 +33,7 @@ export default function RegisterForm({ onSwitchToLogin, onSuccess }: RegisterFor
     }
 
     try {
-      const response = await apiRequest("/cadastrar", {
+      const response = await apiRequest("/register", {
         method: "POST",
         body: JSON.stringify(formData),
       })

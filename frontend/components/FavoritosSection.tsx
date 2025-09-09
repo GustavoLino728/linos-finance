@@ -22,7 +22,7 @@ export default function FavoritosSection() {
       console.log("Carregando favoritos...")
 
       // GET request sem body - email vai na query string automaticamente
-      const response = await apiRequest("/favoritos", {
+      const response = await apiRequest("/favorites", {
         method: "GET",
       })
 
@@ -46,7 +46,7 @@ export default function FavoritosSection() {
 
   const executarLancamento = async (favorito: Favorito) => {
     try {
-      const response = await apiRequest("/add-lancamento", {
+      const response = await apiRequest("/transactions", {
         method: "POST",
         body: JSON.stringify({
           data: new Date().toISOString().split("T")[0],
@@ -75,7 +75,7 @@ export default function FavoritosSection() {
 
   const deletarFavorito = async (id: string) => {
     try {
-      const response = await apiRequest(`/favoritos/${id}`, {
+      const response = await apiRequest(`/favorites/${id}`, {
         method: "DELETE",
       })
 

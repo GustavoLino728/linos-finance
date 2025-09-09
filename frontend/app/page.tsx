@@ -6,7 +6,7 @@ import Header from "../components/Header"
 import LoginForm from "../components/LoginForm"
 import RegisterForm from "../components/RegisterForm"
 import LancamentoForm from "../components/LancamentoForm"
-import FavoritosSection from "../components/FavoritosSection"
+import FavoritosSection from "../components/favoritesSection"
 import WelcomeSection from "../components/WelcomeSection"
 
 export default function Home() {

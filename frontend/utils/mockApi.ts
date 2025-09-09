@@ -8,22 +8,22 @@ export const mockApiRequest = async (endpoint: string, options: RequestInit = {}
   console.log("Mock API called:", endpoint, options.method)
 
   // Mock responses baseados no endpoint
-  if (endpoint === "/add-lancamento" && options.method === "POST") {
+  if (endpoint === "/transactions" && options.method === "POST") {
     return new Response(JSON.stringify({ mensagem: "Lançamento adicionado com sucesso (MOCK)" }), {
       status: 201,
       headers: { "Content-Type": "application/json" },
     })
   }
 
-  if (endpoint === "/favoritos" && options.method === "POST") {
+  if (endpoint === "/favorites" && options.method === "POST") {
     return new Response(JSON.stringify({ mensagem: "Favorito salvo com sucesso (MOCK)" }), {
       status: 201,
       headers: { "Content-Type": "application/json" },
     })
   }
 
-  // GET /favoritos - sem body, email vem na query string
-  if (endpoint === "/favoritos" && options.method === "GET") {
+  // GET /favorites - sem body, email vem na query string
+  if (endpoint === "/favorites" && options.method === "GET") {
     const mockFavoritos = [
       {
         id: "1",
@@ -57,7 +57,7 @@ export const mockApiRequest = async (endpoint: string, options: RequestInit = {}
     })
   }
 
-  if (endpoint.startsWith("/favoritos/") && options.method === "DELETE") {
+  if (endpoint.startsWith("/favorites/") && options.method === "DELETE") {
     return new Response(JSON.stringify({ mensagem: "Favorito removido com sucesso (MOCK)" }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
