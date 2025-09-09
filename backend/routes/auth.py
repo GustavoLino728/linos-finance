@@ -1,7 +1,15 @@
-from flask import request, jsonify, Flask
+from flask import Blueprint, request, jsonify, Flask
+from flask_cors import CORS
 
+auth_bp = Blueprint('auth', __name__)
+origins = [
+    "http://localhost:3000",
+    "https://organizacao-financeira-app.vercel.app"
+]
 
-@app.route('/register', methods=['POST'])
+CORS(auth_bp, resources={r"/*": {"origins": origins}}, supports_credentials=True)
+
+@auth_bp.route('/register', methods=['POST'])
 def register_user():
     data = request.get_json()
     email = data.get('email')
@@ -27,7 +35,7 @@ def register_user():
     return jsonify({"mensagem": "Usuário cadastrado"}), 201
 
 
-@app.route('/login', methods=['POST'])
+@auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     email = data.get('email')

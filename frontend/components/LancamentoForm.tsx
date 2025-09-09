@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { apiRequest } from "../utils/api"
 
@@ -12,11 +11,11 @@ interface LancamentoFormProps {
 export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
   const [activeTab, setActiveTab] = useState<"entrada" | "saida">("entrada")
   const [formData, setFormData] = useState({
-    desc: "",
-    valor: "",
+    description: "",
+    value: "",
     data: new Date().toISOString().split("T")[0],
-    categoria: "",
-    metodoPag: "",
+    category: "",
+    payment_method: "",
     parcelado: false,
     parcelas: 1,
   })
@@ -40,11 +39,11 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
         method: "POST",
         body: JSON.stringify({
           data: formData.data,
-          tipo: activeTab,
-          desc: formData.desc,
-          valor: Number.parseFloat(formData.valor),
-          categoria: formData.categoria,
-          metodoPag: formData.metodoPag,
+          transaction_type: activeTab,
+          description: formData.description,
+          value: Number.parseFloat(formData.value),
+          category: formData.category,
+          payment_method: formData.payment_method,
           parcelado: formData.parcelado,
           parcelas: formData.parcelas,
         }),
@@ -54,11 +53,11 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
         const data = await response.json()
         setMessage(data.mensagem || "Lançamento adicionado com sucesso!")
         setFormData({
-          desc: "",
-          valor: "",
+          description: "",
+          value: "",
           data: new Date().toISOString().split("T")[0],
-          categoria: "",
-          metodoPag: "",
+          category: "",
+          payment_method: "",
           parcelado: false,
           parcelas: 1,
         })
@@ -82,11 +81,11 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
       const response = await apiRequest("/favorites", {
         method: "POST",
         body: JSON.stringify({
-          tipo: activeTab,
-          desc: formData.desc,
-          valor: Number.parseFloat(formData.valor),
-          categoria: formData.categoria,
-          metodoPag: formData.metodoPag,
+          transaction_type: activeTab,
+          description: formData.description,
+          value: Number.parseFloat(formData.value),
+          category: formData.category,
+          payment_method: formData.payment_method,
         }),
       })
 
@@ -122,31 +121,31 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="desc" className="label">
+          <label htmlFor="description" className="label">
             Descrição
           </label>
           <input
-            id="desc"
+            id="description"
             type="text"
             className="input"
-            value={formData.desc}
-            onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Descrição do lançamento"
             required
           />
         </div>
 
         <div className="form-group">
-          <label htmlFor="valor" className="label">
-            Valor (R$)
+          <label htmlFor="value" className="label">
+            value (R$)
           </label>
           <input
-            id="valor"
+            id="value"
             type="number"
             step="0.01"
             className="input"
-            value={formData.valor}
-            onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
+            value={formData.value}
+            onChange={(e) => setFormData({ ...formData, value: e.target.value })}
             placeholder="0,00"
             required
           />
@@ -169,7 +168,7 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
         {activeTab === "saida" && (
           <>
             <div className="form-group">
-              <label className="label">Categoria</label>
+              <label className="label">category</label>
               <button
                 type="button"
                 className="input form-select-button"
@@ -178,7 +177,7 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
                   textAlign: "left",
                 }}
               >
-                {formData.categoria || "Selecionar categoria"}
+                {formData.category || "Selecionar category"}
               </button>
             </div>
 
@@ -192,11 +191,11 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
                   textAlign: "left",
                 }}
               >
-                {formData.metodoPag || "Selecionar método"}
+                {formData.payment_method || "Selecionar método"}
               </button>
             </div>
 
-            {formData.metodoPag === "Cartão de crédito" && (
+            {formData.payment_method === "Cartão de crédito" && (
               <>
                 <div className="form-group">
                   <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -246,7 +245,7 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
             type="button"
             className="btn btn-favorite"
             onClick={salvarFavorito}
-            disabled={isSavingFavorite || !formData.desc || !formData.valor}
+            disabled={isSavingFavorite || !formData.description || !formData.value}
             style={{ minWidth: "120px" }}
           >
             {isSavingFavorite ? "Salvando..." : "⭐ Favorito"}
@@ -254,17 +253,17 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
         </div>
       </form>
 
-      {/* Modal Categoria */}
+      {/* Modal category */}
       {showCategoriaModal && (
         <div className="modal-overlay" onClick={() => setShowCategoriaModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ marginBottom: "16px", color: "var(--primary)" }}>Selecionar Categoria</h3>
-            {categorias.map((categoria) => (
+            <h3 style={{ marginBottom: "16px", color: "var(--primary)" }}>Selecionar category</h3>
+            {categorias.map((category) => (
               <button
-                key={categoria}
+                key={category}
                 className="btn btn-outline"
                 onClick={() => {
-                  setFormData({ ...formData, categoria })
+                  setFormData({ ...formData, category })
                   setShowCategoriaModal(false)
                 }}
                 style={{
@@ -273,7 +272,7 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
                   justifyContent: "flex-start",
                 }}
               >
-                {categoria}
+                {category}
               </button>
             ))}
           </div>
@@ -290,7 +289,7 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
                 key={metodo}
                 className="btn btn-outline"
                 onClick={() => {
-                  setFormData({ ...formData, metodoPag: metodo })
+                  setFormData({ ...formData, payment_method: metodo })
                   setShowMetodoModal(false)
                 }}
                 style={{

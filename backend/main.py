@@ -28,7 +28,7 @@ else:
 credentials_dict["private_key"] = credentials_dict["private_key"].replace("\\n", "\n")
 credentials = Credentials.from_service_account_info(credentials_dict, scopes=SCOPES)
 
-def obter_planilha(email):
+def get_user_sheets(email):
     resposta = supabase.table("users").select("sheet_url").eq("email", email).single().execute()
     if resposta.data is None:
         raise Exception("Usuário não encontrado")
@@ -43,47 +43,47 @@ def obter_planilha(email):
     worksheet = gc.open_by_key(planilha_id).worksheet("Lançamentos")
     return worksheet
 
-def inserir_lancamento(email, data, tipo, desc, valor, categoria="", metodoPag="", parcelado=False, parcelas=1):
-    worksheet = obter_planilha(email)
-    tipo = tipo.lower()
+def create_transaction(email, data, transaction_type, description, value, category="", payment_method="", parcelado=False, parcelas=1):
+    worksheet = get_user_sheets(email)
+    transaction_type = transaction_type.lower()
 
-    if tipo == 'entrada':
-        linha = [data, tipo, desc, valor]
+    if transaction_type == 'entrada':
+        linha = [data, transaction_type, description, value]
         worksheet.append_row(linha)
 
-    elif tipo == 'saida':
+    elif transaction_type == 'saida':
         if parcelado:
-            valor_parcela = round(float(valor) / int(parcelas), 2)
+            valor_parcela = round(float(value) / int(parcelas), 2)
             data_base = datetime.strptime(data, "%Y-%m-%d")
 
             for i in range(int(parcelas)):
                 data_parcela = (data_base + relativedelta(months=i)).strftime("%Y-%m-%d")
-                linha = [data_parcela, tipo, f"{desc} ({i+1}/{parcelas})", valor_parcela, categoria, metodoPag]
+                linha = [data_parcela, transaction_type, f"{description} ({i+1}/{parcelas})", valor_parcela, category, payment_method]
                 worksheet.append_row(linha)
         else:
-            linha = [data, tipo, desc, valor, categoria, metodoPag]
+            linha = [data, transaction_type, description, value, category, payment_method]
             worksheet.append_row(linha)
     else:
-        linha = [data, tipo, desc, valor, categoria, metodoPag]
+        linha = [data, transaction_type, description, value, category, payment_method]
         worksheet.append_row(linha)
 
-def salvar_favorito(email, tipo, desc, valor, categoria="", metodoPag=""):
-    tipo = tipo.lower()
+def save_favorites(email, transaction_type, description, value, category="", payment_method=""):
+    transaction_type = transaction_type.lower()
     data = {
         "user_email": email,
-        "type": tipo,
-        "description": desc,
-        "value": valor
+        "type": transaction_type,
+        "description": description,
+        "value": value
     }
-    if tipo != 'entrada':
+    if transaction_type != 'entrada':
         data.update({
-            "category": categoria,
-            "payment_method": metodoPag
+            "category": category,
+            "payment_method": payment_method
         })
     favorito = supabase.table("favorites").insert(data).execute()
     return favorito
 
-def cadastrar_usuario(email, name, sheet_url):
+def register_user(email, name, sheet_url):
     response = supabase.table("users").insert({
         "email": email,
         "name": name,
@@ -92,6 +92,6 @@ def cadastrar_usuario(email, name, sheet_url):
     return response
 
 def get_balance(email):
-    worksheet = obter_planilha(email)
+    worksheet = get_user_sheets(email)
     balance = worksheet.acell('B10').value
     return balance
