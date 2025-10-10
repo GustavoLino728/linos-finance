@@ -1,4 +1,4 @@
-const API_BASE_URL =
+export const API_BASE_URL =
   process.env.NODE_ENV === "production"
     ? "https://organizacao-financeira-app.onrender.com"
     : "http://localhost:5000"
@@ -22,7 +22,6 @@ export const apiRequest = async (
     mode: "cors",
   }
 
-  // Não modifique o body, não inclua email
   try {
     const response = await fetch(url, requestOptions)
     return response

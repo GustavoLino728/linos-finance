@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/contexts/AuthContext"
 import Header from "@/components/Header"
 import { TransactionHistory } from "@/components/TransactionHistory"
+import { API_BASE_URL } from "@/utils/api" 
 
 type Transaction = {
   data: string
@@ -23,7 +24,7 @@ export default function HistoryPage() {
   useEffect(() => {
     if (!user) return
     setLoading(true)
-    fetch(`/transactions/recent?auth_id=${user.id}`, { credentials: "include" })
+    fetch(`${API_BASE_URL}/transactions/recent`, { credentials: "include" })
       .then(res => {
         if (!res.ok) throw new Error("Erro ao buscar transações")
         return res.json()
