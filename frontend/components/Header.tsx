@@ -3,31 +3,32 @@
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { useRouter } from "next/navigation";  // Importa roteamento do Next.js
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const router = useRouter();
 
   const menuItems = user
     ? [
         { label: "💰 Histórico de Lançamentos", id: "history" },
-        { label: "⭐ Favoritos", id: "favorites" },
-        { label: "💵 Saldo", id: "balance" },
+        { label: "📖 Relatório Semanal", id: "relatory" },
+        { label: "📅 Pagamentos Programados", id: "recurrent" },
+        { label: "❤ Metas", id: "goal" },
       ]
     : [];
 
   const handleMenuItemClick = (id: string) => {
     setIsMenuOpen(false);
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
+    router.push(`/${id}`);
   };
 
   const handleLogout = () => {
     setIsMenuOpen(false);
     logout();
+    router.push("/login");
   };
 
   return (
@@ -65,7 +66,7 @@ export default function Header() {
               {user && (
                 <button
                   className="btn btn-outline btn-logout-desktop"
-                  onClick={logout}
+                  onClick={handleLogout}
                 >
                   Sair
                 </button>

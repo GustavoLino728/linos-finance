@@ -5,9 +5,10 @@ import { useAuth } from "../contexts/AuthContext"
 
 interface LoginFormProps {
   onSwitchToRegister: () => void
+  onSuccess: () => void
 }
 
-export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
+export default function LoginForm({ onSwitchToRegister, onSuccess }: LoginFormProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -26,6 +27,8 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
     const success = await login(email, password)
     if (!success) {
       setError("Credenciais inválidas ou usuário não encontrado")
+    } else {
+      onSuccess()
     }
     setIsLoading(false)
   }
