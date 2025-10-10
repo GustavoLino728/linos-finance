@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useBalance } from "../contexts/BalanceContext"
 import { apiRequest } from "../utils/api"
 
 interface Favorito {
@@ -12,7 +13,8 @@ interface Favorito {
   payment_method?: string
 }
 
-export default function FavoritosSection() {
+export default function FavoritesSectionction() {
+  const { refreshBalance } = useBalance()
   const [favoritos, setFavoritos] = useState<Favorito[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [message, setMessage] = useState("")
@@ -21,7 +23,6 @@ export default function FavoritosSection() {
     try {
       console.log("Carregando favoritos...")
 
-      // GET request sem body - email vai na query string automaticamente
       const response = await apiRequest("/favorites", {
         method: "GET",
       })
@@ -31,7 +32,7 @@ export default function FavoritosSection() {
       if (response.ok) {
         const data = await response.json()
         console.log("Favoritos carregados:", data)
-        setFavoritos(data.resposta || [])
+        setFavoritos(data.response || [])
       } else {
         const errorData = await response.json()
         console.error("Erro ao carregar favoritos:", errorData)
@@ -63,6 +64,7 @@ export default function FavoritosSection() {
       if (response.ok) {
         const data = await response.json()
         setMessage(data.mensagem || "Lançamento executado com sucesso!")
+        refreshBalance()
         setTimeout(() => setMessage(""), 3000)
       } else {
         const errorData = await response.json()

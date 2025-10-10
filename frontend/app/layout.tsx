@@ -2,6 +2,9 @@ import type React from "react"
 import type { Metadata } from "next"
 import { ThemeProvider } from "../contexts/ThemeContext"
 import { AuthProvider } from "../contexts/AuthContext"
+import { BalanceProvider } from "@/contexts/BalanceContext"
+import { HeroUIProvider } from "@heroui/react"
+import { Providers } from "@/app/providers"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -32,9 +35,19 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body>
-        <ThemeProvider>
-          <AuthProvider>{children}</AuthProvider>
-        </ThemeProvider>
+        <Providers>
+        <HeroUIProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <BalanceProvider>
+                
+                  {children}
+                
+              </BalanceProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </HeroUIProvider>
+        </Providers>
       </body>
     </html>
   )

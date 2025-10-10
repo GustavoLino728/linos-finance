@@ -7,13 +7,12 @@ import { apiRequest } from "../utils/api"
 interface User {
   id: string
   email: string
-  sheet_url: string
-  name?: string
+  username?: string
 }
 
 interface AuthContextType {
   user: User | null
-  login: (email: string) => Promise<boolean>
+  login: (email: string, password: string) => Promise<boolean>
   logout: () => void
   isLoading: boolean
 }
@@ -26,50 +25,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const userData = localStorage.getItem("user_data")
-    if (userData) {
+    const token = localStorage.getItem("auth_token")
+    if (userData && token) {
       setUser(JSON.parse(userData))
     }
     setIsLoading(false)
   }, [])
 
-  const login = async (email: string): Promise<boolean> => {
-    console.log("Tentando login com:", email)
-
-    // Login mockado para testes locais
-    if (email === "teste@gmail.com") {
-      console.log("Login mockado detectado!")
-      const mockUser = {
-        id: "mock-user-123",
-        email: "teste@gmail.com",
-        name: "Usuário Teste",
-        sheet_url: "https://docs.google.com/spreadsheets/mock",
-      }
-      setUser(mockUser)
-      localStorage.setItem("user_data", JSON.stringify(mockUser))
-      localStorage.setItem("auth_token", "mock_token_123")
-      return true
-    }
-
+  const login = async (email: string, password: string): Promise<boolean> => {
+    setIsLoading(true)
     try {
       const response = await apiRequest("/login", {
         method: "POST",
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, password }),
       })
-
       if (response.ok) {
-        const userData = await response.json()
-        console.log("data do usuário recebidos:", userData)
-
-        setUser(userData)
-        localStorage.setItem("user_data", JSON.stringify(userData))
-        // Não precisamos mais de token JWT, apenas marcar como logado
-        localStorage.setItem("auth_token", "logged_in")
-
+        const data = await response.json()
+        setUser(data.user)
+        localStorage.setItem("user_data", JSON.stringify(data.user))
+        localStorage.setItem("auth_token", data.access_token)
+        setIsLoading(false)
         return true
       }
+      setIsLoading(false)
       return false
     } catch (error) {
-      console.error("Erro no login:", error)
+      setIsLoading(false)
       return false
     }
   }
@@ -80,7 +61,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("user_data")
   }
 
-  return <AuthContext.Provider value={{ user, login, logout, isLoading }}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {

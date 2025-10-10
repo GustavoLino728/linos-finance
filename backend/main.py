@@ -2,7 +2,7 @@ import json
 import os
 import gspread
 from datetime import datetime
-from supabaseClient import supabase
+from supabaseClient import supabase, supabase_admin
 from dateutil.relativedelta import relativedelta
 from google.oauth2.service_account import Credentials
 from dotenv import load_dotenv
@@ -28,11 +28,11 @@ else:
 credentials_dict["private_key"] = credentials_dict["private_key"].replace("\\n", "\n")
 credentials = Credentials.from_service_account_info(credentials_dict, scopes=SCOPES)
 
-def get_user_sheets(email):
-    resposta = supabase.table("users").select("sheet_url").eq("email", email).single().execute()
-    if resposta.data is None:
+def get_user_sheets(auth_id, worksheet="Lançamentos"):
+    response = supabase_admin.table("user_profiles").select("sheet_url").eq("auth_id", auth_id).single().execute()
+    if response.data is None:
         raise Exception("Usuário não encontrado")
-    url = resposta.data["sheet_url"]
+    url = response.data["sheet_url"]
 
     if "/d/" in url:
         planilha_id = url.split("/d/")[1].split("/")[0]
@@ -40,11 +40,11 @@ def get_user_sheets(email):
         raise Exception("Link da planilha inválido")
 
     gc = gspread.authorize(credentials)
-    worksheet = gc.open_by_key(planilha_id).worksheet("Lançamentos")
+    worksheet = gc.open_by_key(planilha_id).worksheet(worksheet)
     return worksheet
 
-def create_transaction(email, data, transaction_type, description, value, category="", payment_method="", parcelado=False, parcelas=1):
-    worksheet = get_user_sheets(email)
+def create_transaction(auth_id, data, transaction_type, description, value, category="", payment_method="", parcelado=False, parcelas=1):
+    worksheet = get_user_sheets(auth_id)
     transaction_type = transaction_type.lower()
 
     if transaction_type == 'entrada':
@@ -67,10 +67,10 @@ def create_transaction(email, data, transaction_type, description, value, catego
         linha = [data, transaction_type, description, value, category, payment_method]
         worksheet.append_row(linha)
 
-def save_favorites(email, transaction_type, description, value, category="", payment_method=""):
+def save_favorites(auth_id, transaction_type, description, value, category="", payment_method=""):
     transaction_type = transaction_type.lower()
     data = {
-        "user_email": email,
+        "auth_id": auth_id,
         "type": transaction_type,
         "description": description,
         "value": value
@@ -80,18 +80,10 @@ def save_favorites(email, transaction_type, description, value, category="", pay
             "category": category,
             "payment_method": payment_method
         })
-    favorito = supabase.table("favorites").insert(data).execute()
+    favorito = supabase_admin.table("favorites").insert(data).execute()
     return favorito
 
-def register_user(email, name, sheet_url):
-    response = supabase.table("users").insert({
-        "email": email,
-        "name": name,
-        "sheet_url": sheet_url
-    }).execute()
-    return response
-
-def get_balance(email):
-    worksheet = get_user_sheets(email)
-    balance = worksheet.acell('B10').value
+def get_balance(auth_id):
+    worksheet = get_user_sheets(auth_id, worksheet="Resumo Mensal")
+    balance = worksheet.acell('B9').value
     return balance

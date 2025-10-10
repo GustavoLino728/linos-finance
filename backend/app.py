@@ -2,8 +2,10 @@ from main import create_transaction, get_balance
 from routes.auth import auth_bp
 from routes.favorites import favorites_bp
 from supabaseClient import supabase
-from flask import request, jsonify, Flask
+from auth_middleware import requires_auth
+from flask import request, jsonify, Flask, g
 from flask_cors import CORS
+
 
 app = Flask(__name__)
 
@@ -17,28 +19,25 @@ CORS(app, resources={r"/*": {"origins": origins}}, supports_credentials=True)
 app.register_blueprint(auth_bp)
 app.register_blueprint(favorites_bp)
 
-@app.route("/meu-perfil")
-def meu_perfil():
-    return jsonify({"msg": "ok"})
-
 @app.route('/transactions', methods=['POST'])
+@requires_auth
 def add_transaction():
     data = request.get_json()
-    email = data['email'] 
-
-    create_transaction(email, data['data'], data['transaction_type'], data['description'], data['value'],
+    auth_id = g.auth_id
+    
+    create_transaction(auth_id, data['data'], data['transaction_type'], data['description'], data['value'],
                       data.get('category', ""), data.get('payment_method', ""),
                       data.get('parcelado', False), data.get('parcelas', 1))
     return jsonify({"mensagem": "Lançamento adicionado com sucesso"}), 201
 
 
-@app.route('/balance', methods=['GET'])
-def check_balance():
-    email = request.args.get('email')
-    if not email:
-        return jsonify({"erro": "Parâmetro 'email' é obrigatório"}), 400
 
-    balance_atual = get_balance(email)
+@app.route('/balance', methods=['GET'])
+@requires_auth
+def check_balance():
+    auth_id = g.auth_id
+
+    balance_atual = get_balance(auth_id)
     return jsonify({
         "mensagem": "Saldo resgatado com sucesso!",
         "balance": balance_atual

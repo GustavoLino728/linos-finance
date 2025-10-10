@@ -1,14 +1,15 @@
 "use client"
 
-import type React from "react"
 import { useState } from "react"
 import { apiRequest } from "../utils/api"
+import { useBalance } from "@/contexts/BalanceContext"
 
-interface LancamentoFormProps {
+interface TransactionFormProps {
   onSuccess: () => void
 }
 
-export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
+export default function TransactionForm({ onSuccess }: TransactionFormProps) {
+  const { refreshBalance } = useBalance()
   const [activeTab, setActiveTab] = useState<"entrada" | "saida">("entrada")
   const [formData, setFormData] = useState({
     description: "",
@@ -26,7 +27,6 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
   const [isSavingFavorite, setIsSavingFavorite] = useState(false)
 
   const categorias = ["Alimentação", "Transporte", "Saúde", "Educação", "Lazer", "Casa", "Roupas", "Outros"]
-
   const metodosPagamento = ["Dinheiro", "Cartão de débito", "Cartão de crédito", "PIX", "Transferência", "Outros"]
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,7 +48,6 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
           parcelas: formData.parcelas,
         }),
       })
-
       if (response.ok) {
         const data = await response.json()
         setMessage(data.mensagem || "Lançamento adicionado com sucesso!")
@@ -61,6 +60,7 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
           parcelado: false,
           parcelas: 1,
         })
+        refreshBalance()
         onSuccess()
       } else {
         const errorData = await response.json()
@@ -68,7 +68,6 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
       }
     } catch (error) {
       setMessage("Erro de conexão")
-      console.error("Erro:", error)
     }
     setIsLoading(false)
   }
@@ -76,7 +75,6 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
   const salvarFavorito = async () => {
     setIsSavingFavorite(true)
     setMessage("")
-
     try {
       const response = await apiRequest("/favorites", {
         method: "POST",
@@ -88,7 +86,6 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
           payment_method: formData.payment_method,
         }),
       })
-
       if (response.ok) {
         const data = await response.json()
         setMessage(data.mensagem || "Favorito salvo com sucesso!")
@@ -99,12 +96,10 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
       }
     } catch (error) {
       setMessage("Erro de conexão")
-      console.error("Erro:", error)
     }
     setIsSavingFavorite(false)
   }
-
-  return (
+    return (
     <div className="card">
       <div className="title-with-gradient">
         <h2 style={{ fontSize: "24px", margin: 0 }}>Adicionar Lançamento</h2>
@@ -137,7 +132,7 @@ export default function LancamentoForm({ onSuccess }: LancamentoFormProps) {
 
         <div className="form-group">
           <label htmlFor="value" className="label">
-            value (R$)
+            Valor (R$)
           </label>
           <input
             id="value"

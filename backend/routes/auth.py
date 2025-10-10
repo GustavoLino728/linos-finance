@@ -1,4 +1,5 @@
-from flask import Blueprint, request, jsonify, Flask
+from flask import Blueprint, request, jsonify
+from supabaseClient import supabase, supabase_admin
 from flask_cors import CORS
 
 auth_bp = Blueprint('auth', __name__)
@@ -9,46 +10,57 @@ origins = [
 
 CORS(auth_bp, resources={r"/*": {"origins": origins}}, supports_credentials=True)
 
-@auth_bp.route('/register', methods=['POST'])
-def register_user():
+@auth_bp.route("/register", methods=["POST"])
+def register():
     data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
-    name = data.get('name')
-    sheet_url = data.get('sheet_url')
-
+    email = data.get("email")
+    password = data.get("password")
+    sheet_url = data.get("sheet_url")
+    username = data.get("username")
+    
     if not email or not password or not sheet_url:
-        return jsonify({"erro": "Email, senha e link da planilha são obrigatórios"}), 400
+        return jsonify({"error": "Campos obrigatórios faltando"}), 400
 
-    user = supabase.auth.sign_up({"email": email, "password": password})
+    try:
+        response = supabase.auth.sign_up({"email": email, "password": password})
+        user = response.user
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 400
 
-    if user.get("error"):
-        return jsonify({"erro": user["error"]["message"]}), 400
+    if not user:
+        return jsonify({"erro": "Falha ao cadastrar usuário"}), 400
 
-    supabase.table("users").insert({
-        "email": email,
-        "name": name,
+    supabase_admin.table("user_profiles").insert({
+        "auth_id": user.id,
         "sheet_url": sheet_url,
-        "auth_id": user["user"]["id"]
+        "username": username
     }).execute()
 
-    return jsonify({"mensagem": "Usuário cadastrado"}), 201
+    return jsonify({"mensagem": "Usuário cadastrado com sucesso"}), 201
 
 
-@auth_bp.route('/login', methods=['POST'])
+@auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
+    try:
+        response = supabase.auth.sign_in_with_password({
+        "email": data.get("email"),
+        "password": data.get("password")
+        })
 
-    response = supabase.auth.sign_in_with_password({"email": email, "password": password})
-    if response.get("error"):
-        return jsonify({"erro": response["error"]["message"]}), 401
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 400
+    
+    user = response.user
 
-    user = response["user"]
-    access_token = response["session"]["access_token"]
+    profile_response = supabase_admin.table("user_profiles").select("username").eq("auth_id", user.id).single().execute()
+    username = profile_response.data["username"] if profile_response.data else ""
 
     return jsonify({
-        "access_token": access_token,
-        "user": {"id": user["id"], "email": user["email"]}
+        "access_token": response.session.access_token,
+        "user": {
+            "id": response.user.id,
+            "email": response.user.email,
+            "username": username 
+        }
     }), 200

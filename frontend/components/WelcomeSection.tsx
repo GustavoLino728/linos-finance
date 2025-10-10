@@ -35,7 +35,7 @@ export default function WelcomeSection() {
             fontWeight: "600",
           }}
         >
-          Olá, {user.name || user.email.split("@")[0]}! 👋
+          👋 Olá, {user.username || "Usuário"}! 
         </h2>
         <p
           style={{

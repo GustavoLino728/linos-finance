@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { apiRequest } from "../utils/api"
 
@@ -12,8 +10,9 @@ interface RegisterFormProps {
 
 export default function RegisterForm({ onSwitchToLogin, onSuccess }: RegisterFormProps) {
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
+    password: "",
     sheet_url: "",
   })
   const [error, setError] = useState("")
@@ -25,19 +24,21 @@ export default function RegisterForm({ onSwitchToLogin, onSuccess }: RegisterFor
     setError("")
     setSuccess("")
     setIsLoading(true)
-
-    if (!formData.name || !formData.email || !formData.sheet_url) {
+    if (
+      !formData.username ||
+      !formData.email ||
+      !formData.password ||
+      !formData.sheet_url
+    ) {
       setError("Todos os campos são obrigatórios")
       setIsLoading(false)
       return
     }
-
     try {
       const response = await apiRequest("/register", {
         method: "POST",
         body: JSON.stringify(formData),
       })
-
       if (response.ok) {
         setSuccess("Usuário cadastrado com sucesso!")
         setTimeout(() => {
@@ -59,27 +60,21 @@ export default function RegisterForm({ onSwitchToLogin, onSuccess }: RegisterFor
         <h1 style={{ fontSize: "28px", margin: 0 }}>Cadastro</h1>
         <p className="subtitle-text">Crie sua conta para começar a organizar suas finanças</p>
       </div>
-
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="name" className="label">
-            Nome
-          </label>
+          <label htmlFor="username" className="label">Nome</label>
           <input
-            id="name"
+            id="username"
             type="text"
             className="input"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="Seu nome completo"
+            value={formData.username}
+            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            placeholder="Seu nome de usuário"
             required
           />
         </div>
-
         <div className="form-group">
-          <label htmlFor="email" className="label">
-            Email
-          </label>
+          <label htmlFor="email" className="label">Email</label>
           <input
             id="email"
             type="email"
@@ -90,11 +85,20 @@ export default function RegisterForm({ onSwitchToLogin, onSuccess }: RegisterFor
             required
           />
         </div>
-
         <div className="form-group">
-          <label htmlFor="sheet_url" className="label">
-            Link da Planilha Google Sheets
-          </label>
+          <label htmlFor="password" className="label">Senha</label>
+          <input
+            id="password"
+            type="password"
+            className="input"
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            placeholder="••••••••"
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="sheet_url" className="label">Link da Planilha Google Sheets</label>
           <input
             id="sheet_url"
             type="url"
@@ -105,10 +109,8 @@ export default function RegisterForm({ onSwitchToLogin, onSuccess }: RegisterFor
             required
           />
         </div>
-
         {error && <div className="error-message">{error}</div>}
         {success && <div className="success-message">{success}</div>}
-
         <button
           type="submit"
           className="btn btn-primary"
@@ -118,7 +120,6 @@ export default function RegisterForm({ onSwitchToLogin, onSuccess }: RegisterFor
           {isLoading ? "Cadastrando..." : "Cadastrar"}
         </button>
       </form>
-
       <div style={{ textAlign: "center" }}>
         <span style={{ color: "var(--text-secondary)" }}>Já tem uma conta? </span>
         <button
