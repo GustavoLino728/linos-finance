@@ -7,9 +7,12 @@ import BalanceSection from "@/components/BalanceSection"
 import TransactionForm from "@/components/TransactionForm"
 import FavoritesSection from "@/components/FavoritesSection"
 import { useState } from "react"
+import { useAuth } from "@/contexts/AuthContext"
+
 
 export default function HomePage() {
   const [refreshFavorites, setRefreshFavorites] = useState(0)
+  const { user } = useAuth()
 
   return (
     <ProtectedRoute>
@@ -28,6 +31,11 @@ export default function HomePage() {
                 margin: "0 auto",
               }}
             >
+              {user?.sheet_url && (
+                <a href={user.sheet_url} target="_blank" rel="noopener noreferrer" className="floating-sheet-button" aria-label="Abrir planilha">
+                  📊
+                </a>
+              )}
               <TransactionForm onSuccess={() => setRefreshFavorites((prev) => prev + 1)} />
               <FavoritesSection key={refreshFavorites} />
             </div>

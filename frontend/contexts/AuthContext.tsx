@@ -8,10 +8,12 @@ interface User {
   id: string
   email: string
   username?: string
+  sheet_url?: string
 }
 
 interface AuthContextType {
   user: User | null
+  token: string | null
   login: (email: string, password: string) => Promise<boolean>
   logout: () => void
   isLoading: boolean
@@ -21,13 +23,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const userData = localStorage.getItem("user_data")
-    const token = localStorage.getItem("auth_token")
-    if (userData && token) {
+    const savedToken = localStorage.getItem("auth_token")
+    if (userData && savedToken) {
       setUser(JSON.parse(userData))
+      setToken(savedToken)
     }
     setIsLoading(false)
   }, [])
@@ -41,7 +45,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       if (response.ok) {
         const data = await response.json()
-        setUser(data.user)
+        setUser({
+          ...data.user,
+          sheet_url: data.user.sheet_url
+        })
+        setToken(data.access_token)
         localStorage.setItem("user_data", JSON.stringify(data.user))
         localStorage.setItem("auth_token", data.access_token)
         setIsLoading(false)
@@ -57,12 +65,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setUser(null)
+    setToken(null)
     localStorage.removeItem("auth_token")
     localStorage.removeItem("user_data")
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   )

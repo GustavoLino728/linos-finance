@@ -53,14 +53,16 @@ def login():
     
     user = response.user
 
-    profile_response = supabase_admin.table("user_profiles").select("username").eq("auth_id", user.id).single().execute()
+    profile_response = supabase_admin.table("user_profiles").select("username,sheet_url").eq("auth_id", user.id).single().execute()
     username = profile_response.data["username"] if profile_response.data else ""
+    sheet_url = profile_response.data["sheet_url"] if profile_response.data else ""
 
     return jsonify({
         "access_token": response.session.access_token,
         "user": {
             "id": response.user.id,
             "email": response.user.email,
-            "username": username 
+            "username": username,
+            "sheet_url": sheet_url
         }
     }), 200

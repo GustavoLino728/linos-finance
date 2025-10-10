@@ -669,6 +669,28 @@ body {
   box-sizing: border-box;
 }
 
+.floating-sheet-button {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  background-color: #34A853;
+  color: white;
+  font-size: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+  z-index: 1000;
+}
+.floating-sheet-button:hover {
+  background-color: #2e7d32;
+}
+
 /* Responsivo - esconder logout desktop em mobile */
 @media (max-width: 640px) {
   .btn-logout-desktop {
