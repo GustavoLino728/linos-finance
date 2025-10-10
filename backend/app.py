@@ -1,4 +1,4 @@
-from main import create_transaction, get_balance
+from main import create_transaction, get_balance, get_last_transactions
 from routes.auth import auth_bp
 from routes.favorites import favorites_bp
 from supabaseClient import supabase
@@ -30,6 +30,15 @@ def add_transaction():
                       data.get('parcelado', False), data.get('parcelas', 1))
     return jsonify({"mensagem": "Lançamento adicionado com sucesso"}), 201
 
+@app.route('/transactions/recent', methods=['GET'])
+@requires_auth
+def recent_transactions():
+    auth_id = g.auth_id
+    try:
+        transactions = get_last_transactions(auth_id)
+        return jsonify({"transactions": transactions}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route('/balance', methods=['GET'])

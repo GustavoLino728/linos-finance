@@ -83,6 +83,34 @@ def save_favorites(auth_id, transaction_type, description, value, category="", p
     favorito = supabase_admin.table("favorites").insert(data).execute()
     return favorito
 
+def get_last_transactions(auth_id, worksheet_name="Resumo Mensal", 
+                                    start_col='D', end_col='I', header_row=2, max_records=10):
+    worksheet = get_user_sheets(auth_id, worksheet=worksheet_name)
+    
+    col_index_to_check = 5 
+    col_values = worksheet.col_values(col_index_to_check)
+    
+    total_rows = len(col_values)
+    
+    if total_rows <= header_row:
+        return [] 
+    
+    start_row = header_row + 1
+    end_row = total_rows
+    
+    cell_range = f"{start_col}{start_row}:{end_col}{end_row}"
+    
+    data = worksheet.get(cell_range)
+    
+    last_rows = data[-max_records:] if len(data) > max_records else data
+    
+    headers = ["Data", "Tipo", "Descrição", "Valor", "Categoria", "Método de Pagamento"]
+    transactions = [dict(zip(headers, row)) for row in last_rows]
+    
+    print(transactions)
+    return transactions
+
+
 def get_balance(auth_id):
     worksheet = get_user_sheets(auth_id, worksheet="Resumo Mensal")
     balance = worksheet.acell('B9').value

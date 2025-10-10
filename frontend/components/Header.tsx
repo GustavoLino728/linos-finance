@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
-import { useRouter } from "next/navigation";  // Importa roteamento do Next.js
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,6 +14,7 @@ export default function Header() {
 
   const menuItems = user
     ? [
+        { label: "🏠 Home", id: "" },
         { label: "💰 Histórico de Lançamentos", id: "history" },
         { label: "📖 Relatório Semanal", id: "relatory" },
         { label: "📅 Pagamentos Programados", id: "recurrent" },
@@ -51,7 +53,9 @@ export default function Header() {
                   </div>
                 </button>
               )}
-              <div className="logo-enhanced">Lino$</div>
+              <Link href={"/"} style={{ textDecoration: "none", color: "inherit" }}>
+                <div className="logo-enhanced">Lino$</div>
+              </Link>
             </div>
 
             {/* Tema + Logout (Desktop) */}
