@@ -18,7 +18,7 @@ export default function Header() {
         { label: "🕑 Histórico de Transações", id: "history" },
         { label: "📖 Relatório Semanal", id: "relatory" },
         { label: "📅 Pagamentos Programados", id: "recurrent" },
-        { label: "❤ Metas", id: "goals" },
+        { label: "🎯 Metas", id: "goals" },
       ]
     : [];
 

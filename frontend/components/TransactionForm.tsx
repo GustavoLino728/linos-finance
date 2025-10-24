@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { apiRequest } from "../utils/api"
 import { useBalance } from "@/contexts/BalanceContext"
+import { notifications } from "@mantine/notifications"
 
 interface TransactionFormProps {
   onSuccess: () => void
@@ -51,6 +52,11 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
       if (response.ok) {
         const data = await response.json()
         setMessage(data.mensagem || "Lançamento adicionado com sucesso!")
+        notifications.show({
+          title: "Sucesso!",
+          message: "Lançamento adicionado com sucesso!",
+          color: "green",
+        })
         setFormData({
           description: "",
           value: "",
@@ -89,6 +95,11 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
       if (response.ok) {
         const data = await response.json()
         setMessage(data.mensagem || "Favorito salvo com sucesso!")
+        notifications.show({
+          title: "Sucesso!",
+          message: "Favorito salvo com sucesso!",
+          color: "green",
+        })
         onSuccess()
       } else {
         const errorData = await response.json()
@@ -163,7 +174,7 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
         {activeTab === "saida" && (
           <>
             <div className="form-group">
-              <label className="label">category</label>
+              <label className="label">Categoria</label>
               <button
                 type="button"
                 className="input form-select-button"
@@ -172,7 +183,7 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
                   textAlign: "left",
                 }}
               >
-                {formData.category || "Selecionar category"}
+                {formData.category || "Selecione a categoria"}
               </button>
             </div>
 

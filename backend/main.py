@@ -121,7 +121,7 @@ def get_last_transactions(auth_id, worksheet_name="Resumo Mensal",
 
 def create_goal_supabase(auth_id, name, goal_value, current_value):
     data = {
-        "uuid": auth_id,
+        "auth_id": auth_id,
         "name": name,
         "goal_value": goal_value,
         "current_value": current_value

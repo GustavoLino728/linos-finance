@@ -5,23 +5,23 @@ import { Progress } from "@mantine/core"
 interface GoalCardProps {
   uuid: string
   name: string
-  current: number
-  target: number
-  category?: string
+  current_value: number
+  goal_value: number
+  onClick?: () => void
   onEdit?: () => void
   onDelete?: () => void
 }
 
 export default function GoalCard({
   name,
-  current,
-  target,
-  category,
+  current_value,
+  goal_value,
+  onClick,
   onEdit,
   onDelete,
 }: GoalCardProps) {
-  const percentage = Math.min((current / target) * 100, 100)
-  const isCompleted = current >= target
+  const percentage = Math.min((current_value / goal_value) * 100, 100)
+  const isCompleted = current_value >= goal_value
 
   return (
     <div
@@ -45,18 +45,6 @@ export default function GoalCard({
         >
           {name}
         </h3>
-        {category && (
-          <span
-            style={{
-              fontSize: "12px",
-              color: "#666",
-              marginTop: "4px",
-              display: "block",
-            }}
-          >
-            {category}
-          </span>
-        )}
       </div>
 
       {/* Valores */}
@@ -75,10 +63,10 @@ export default function GoalCard({
             color: isCompleted ? "#2E7D32" : "#333",
           }}
         >
-          {current.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+          {current_value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
         </span>
         <span style={{ fontSize: "14px", color: "#666" }}>
-          / {target.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+          / {goal_value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
         </span>
       </div>
 
@@ -104,7 +92,7 @@ export default function GoalCard({
       </div>
 
       {/* Botões de ação */}
-      {(onEdit || onDelete) && (
+      {(onEdit || onDelete || onClick) && (
         <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
           {onEdit && (
             <button

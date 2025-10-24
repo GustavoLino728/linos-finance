@@ -6,13 +6,13 @@ import Header from "@/components/Header"
 import GoalCard from "@/components/GoalCard"
 import { apiRequest } from "@/utils/api"
 import { notifications } from "@mantine/notifications"
-import { Modal, TextInput, NumberInput, Select, Button, Stack } from "@mantine/core"
+import { Modal, TextInput, NumberInput, Select, Button, Stack, ModalBase } from "@mantine/core"
 
 interface Goal {
   uuid: string
   name: string
-  current: number
-  target: number
+  current_value: number
+  goal_value: number
 }
 
 export default function GoalsPage() {
@@ -24,8 +24,8 @@ export default function GoalsPage() {
 
   // Estado do formulário
   const [name, setName] = useState("")
-  const [current, setCurrent] = useState<number>(0)
-  const [target, setTarget] = useState<number>(0)
+  const [current_value, setCurrentValue] = useState<number>(0)
+  const [goal_value, setGoalValue] = useState<number>(0)
 
   // Carrega as metas
   const loadGoals = async () => {
@@ -37,7 +37,7 @@ export default function GoalsPage() {
       if (response.ok) {
         const data = await response.json()
         console.log("Metas carregadas:", data)
-        setGoals(data.goals || [])
+        setGoals(data.response || [])
       }
     } catch (error) {
       console.error("Erro ao carregar metas:", error)
@@ -53,7 +53,7 @@ export default function GoalsPage() {
 
       const response = await apiRequest(endpoint, {
         method,
-        body: JSON.stringify({ name, current, target }),
+        body: JSON.stringify({ name, current_value, goal_value }),
       })
 
       if (response.ok) {
@@ -104,16 +104,23 @@ export default function GoalsPage() {
   const openEditModal = (goal: Goal) => {
     setEditingGoal(goal)
     setName(goal.name)
-    setCurrent(goal.current)
-    setTarget(goal.target)
+    setCurrentValue(goal.current_value)
+    setGoalValue(goal.goal_value)
     setModalOpened(true)
   }
 
   const openNewModal = () => {
     setEditingGoal(null)
     setName("")
-    setCurrent(0)
-    setTarget(0)
+    setCurrentValue(0)
+    setGoalValue(0)
+    setModalOpened(true)
+  }
+  const openGoalModal = () => {
+    setEditingGoal(null)
+    setName("")
+    setCurrentValue(0)
+    setGoalValue(0)
     setModalOpened(true)
   }
 
@@ -193,8 +200,9 @@ export default function GoalsPage() {
                 key={goal.uuid}
                 uuid={goal.uuid}
                 name={goal.name}
-                current={goal.current}
-                target={goal.target}
+                current_value={goal.current_value}
+                goal_value={goal.goal_value}
+                onClick={() => openGoalModal}
                 onEdit={() => openEditModal(goal)}
                 onDelete={() => deleteGoal(goal.uuid)}
               />
@@ -222,8 +230,8 @@ export default function GoalsPage() {
             <NumberInput
               label="Valor Atual (R$)"
               placeholder="0.00"
-              value={current}
-              onChange={(value) => setCurrent(Number(value) || 0)}
+              value={current_value}
+              onChange={(value) => setCurrentValue(Number(value) || 0)}
               min={0}
               decimalScale={2}
               fixedDecimalScale
@@ -235,8 +243,8 @@ export default function GoalsPage() {
             <NumberInput
               label="Valor Meta (R$)"
               placeholder="10000.00"
-              value={target}
-              onChange={(value) => setTarget(Number(value) || 0)}
+              value={goal_value}
+              onChange={(value) => setGoalValue(Number(value) || 0)}
               min={0}
               decimalScale={2}
               fixedDecimalScale
@@ -255,6 +263,28 @@ export default function GoalsPage() {
               </Button>
             </div>
           </Stack>
+        </Modal>
+
+        <Modal 
+          opened={modalOpened}
+          onClose={closeModal}
+          title={goals.name}
+          centered
+          size="md">
+          <Stack gap="md">
+            <NumberInput
+                label="Valor do Aporte (R$)"
+                placeholder="0.00"
+                value={current_value}
+                onChange={(value) => setCurrentValue(Number(value) || 0)}
+                min={0}
+                decimalScale={2}
+                fixedDecimalScale
+                prefix="R$ "
+                thousandSeparator="."
+                decimalSeparator=","
+              />
+          <Stack/>
         </Modal>
       </main>
     </div>
