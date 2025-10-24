@@ -15,10 +15,10 @@ export default function Header() {
   const menuItems = user
     ? [
         { label: "🏠 Home", id: "" },
-        { label: "💰 Histórico de Lançamentos", id: "history" },
+        { label: "🕑 Histórico de Transações", id: "history" },
         { label: "📖 Relatório Semanal", id: "relatory" },
         { label: "📅 Pagamentos Programados", id: "recurrent" },
-        { label: "❤ Metas", id: "goal" },
+        { label: "❤ Metas", id: "goals" },
       ]
     : [];
 

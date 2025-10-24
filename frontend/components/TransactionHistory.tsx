@@ -1,12 +1,14 @@
-import React from "react"
+"use client"
+
+import TransactionCard from "./TransactionCard"
 
 type Transaction = {
   data: string
   tipo: string
-  descrição: string
+  descricao: string 
   valor: string
   categoria?: string
-  "método de pagamento"?: string
+  metodoPagamento?: string 
 }
 
 interface TransactionHistoryProps {
@@ -14,43 +16,37 @@ interface TransactionHistoryProps {
 }
 
 export function TransactionHistory({ transactions }: TransactionHistoryProps) {
+
+  if (!transactions || transactions.length === 0) {
+    return (
+      <div className="card">
+        <p style={{ textAlign: "center", color: "var(--text-secondary)", padding: "40px 0" }}>
+          Nenhuma transação encontrada
+        </p>
+      </div>
+    )
+  }
+
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      gap: "16px",
-      marginTop: "2rem"
-    }}>
-      <h2 style={{ textAlign: "center", fontWeight: "bold" }}>
-        Histórico de Transações<br />
-        <span style={{ fontWeight: "normal", fontSize: "1rem" }}>
-          (Últimas 10 realizadas)
-        </span>
-      </h2>
-      {transactions.map((t, idx) => {
-        const isEntrada = t.tipo?.toLowerCase() === "entrada"
+    <div className="card">
+      <div className="title-with-gradient">
+        <h2 style={{ fontSize: "24px", margin: 0 }}>Histórico de Transações</h2>
+      </div>
+
+      {transactions.map((transaction, index) => {
+        console.log(`Transaction ${index}:`, transaction)
+        
         return (
-          <div
-            key={idx}
-            style={{
-              background: isEntrada ? "#d2f8d2" : "#ffd6d6",
-              borderRadius: "16px",
-              padding: "18px 16px",
-              boxShadow: "0 2px 8px #0001",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "12px"
-            }}>
-            <div style={{ minWidth: "85px", fontWeight: 700 }}>{t.data}</div>
-            <div style={{ flex: 1, textAlign: "center", fontWeight: "bold" }}>{t.descrição}</div>
-            <div style={{
-              fontWeight: 700,
-              color: isEntrada ? "green" : "red"
-            }}>
-              {parseFloat(t.valor).toLocaleString("pt-BR", {style: "currency", currency: "BRL"})}
-            </div>
-          </div>
+          <TransactionCard
+            key={`${transaction.data}-${index}`}
+            type={transaction.tipo === "entrada" ? "entrada" : "saida"}
+            description={transaction.descricao}
+            value={transaction.valor}
+            date={transaction.data}
+            category={transaction.categoria}
+            paymentMethod={transaction.metodoPagamento}
+            showActions={false}
+          />
         )
       })}
     </div>

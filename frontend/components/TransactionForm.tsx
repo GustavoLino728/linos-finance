@@ -238,7 +238,7 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
 
           <button
             type="button"
-            className="btn btn-favorite"
+            className="btn btn-secondary"
             onClick={salvarFavorito}
             disabled={isSavingFavorite || !formData.description || !formData.value}
             style={{ minWidth: "120px" }}

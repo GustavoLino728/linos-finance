@@ -102,7 +102,7 @@ def get_last_transactions(auth_id, worksheet_name="Resumo Mensal",
     
     data = worksheet.get(cell_range)
     
-    last_rows = data[-max_records:] if len(data) > max_records else data
+    last_rows = list(reversed(data))[-max_records:] if len(data) > max_records else list(reversed(data))
     
     headers = ["data", "tipo", "descricao", "valor", "categoria", "metodoPagamento"]
     
