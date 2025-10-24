@@ -2,13 +2,14 @@ import type { Metadata, Viewport } from "next";
 import React from "react";
 
 import { MantineProvider, ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
-import "@mantine/notifications/styles.css";
 import { Notifications } from "@mantine/notifications";
 
 import { ThemeProvider } from "../contexts/ThemeContext";
 import { AuthProvider } from "../contexts/AuthContext";
 import { BalanceProvider } from "@/contexts/BalanceContext";
 
+import "@mantine/notifications/styles.css";
+import "@mantine/core/styles.css";
 import "./globals.css";
 
 export const metadata: Metadata = {

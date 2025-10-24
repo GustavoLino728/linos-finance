@@ -1,6 +1,7 @@
 from main import create_transaction, get_balance, get_last_transactions
 from routes.auth import auth_bp
 from routes.favorites import favorites_bp
+from routes.goals import goals_bp
 from supabaseClient import supabase
 from auth_middleware import requires_auth
 from flask import request, jsonify, Flask, g
@@ -18,6 +19,7 @@ CORS(app, resources={r"/*": {"origins": origins}}, supports_credentials=True)
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(favorites_bp)
+app.register_blueprint(goals_bp)
 
 @app.route('/transactions', methods=['POST'])
 @requires_auth

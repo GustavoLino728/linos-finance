@@ -6,14 +6,13 @@ import Header from "@/components/Header"
 import GoalCard from "@/components/GoalCard"
 import { apiRequest } from "@/utils/api"
 import { notifications } from "@mantine/notifications"
-import { Modal, TextInput, NumberInput, Select, Button } from "@mantine/core"
+import { Modal, TextInput, NumberInput, Select, Button, Stack } from "@mantine/core"
 
 interface Goal {
-  id: string
+  uuid: string
   name: string
   current: number
   target: number
-  category?: string
 }
 
 export default function GoalsPage() {
@@ -24,24 +23,20 @@ export default function GoalsPage() {
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null)
 
   // Estado do formulário
-  const [formData, setFormData] = useState({
-    name: "",
-    current: 0,
-    target: 0,
-    category: "Carro",
-  })
+  const [name, setName] = useState("")
+  const [current, setCurrent] = useState<number>(0)
+  const [target, setTarget] = useState<number>(0)
 
   // Carrega as metas
   const loadGoals = async () => {
     if (!token) return
 
     try {
-      const response = await apiRequest("/goals", {
-        method: "GET",
-      })
+      const response = await apiRequest("/goals", { method: "GET" })
 
       if (response.ok) {
         const data = await response.json()
+        console.log("Metas carregadas:", data)
         setGoals(data.goals || [])
       }
     } catch (error) {
@@ -54,11 +49,11 @@ export default function GoalsPage() {
   const saveGoal = async () => {
     try {
       const method = editingGoal ? "PUT" : "POST"
-      const endpoint = editingGoal ? `/goals/${editingGoal.id}` : "/goals"
+      const endpoint = editingGoal ? `/goals/${editingGoal.uuid}` : "/goals"
 
       const response = await apiRequest(endpoint, {
         method,
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ name, current, target }),
       })
 
       if (response.ok) {
@@ -82,13 +77,11 @@ export default function GoalsPage() {
   }
 
   // Deleta meta
-  const deleteGoal = async (id: string) => {
+  const deleteGoal = async (uuid: string) => {
     if (!confirm("Deseja realmente remover esta meta?")) return
 
     try {
-      const response = await apiRequest(`/goals/${id}`, {
-        method: "DELETE",
-      })
+      const response = await apiRequest(`/goals/${uuid}`, { method: "DELETE" })
 
       if (response.ok) {
         notifications.show({
@@ -110,28 +103,20 @@ export default function GoalsPage() {
   // Abre modal para edição
   const openEditModal = (goal: Goal) => {
     setEditingGoal(goal)
-    setFormData({
-      name: goal.name,
-      current: goal.current,
-      target: goal.target,
-      category: goal.category || "Carro",
-    })
+    setName(goal.name)
+    setCurrent(goal.current)
+    setTarget(goal.target)
     setModalOpened(true)
   }
 
-  // Abre modal para nova meta
   const openNewModal = () => {
     setEditingGoal(null)
-    setFormData({
-      name: "",
-      current: 0,
-      target: 0,
-      category: "Carro",
-    })
+    setName("")
+    setCurrent(0)
+    setTarget(0)
     setModalOpened(true)
   }
 
-  // Fecha modal
   const closeModal = () => {
     setModalOpened(false)
     setEditingGoal(null)
@@ -156,11 +141,23 @@ export default function GoalsPage() {
   return (
     <div className="page-background">
       <Header />
-      <main style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+      <main style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
         {/* Título e botão */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
           <h1 style={{ fontSize: "32px", fontWeight: "bold", margin: 0 }}>🎯 Metas</h1>
-          <button onClick={openNewModal} className="btn btn-success" style={{ padding: "12px 24px" }}>
+          <button
+            onClick={openNewModal}
+            style={{
+              padding: "12px 24px",
+              fontSize: "16px",
+              background: "#2E7D32",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontWeight: "600",
+            }}
+          >
             ➕ Nova Meta
           </button>
         </div>
@@ -169,13 +166,22 @@ export default function GoalsPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-            gap: "16px",
+            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+            gap: "20px",
           }}
         >
           {goals.length === 0 ? (
-            <div className="card" style={{ gridColumn: "1 / -1", padding: "40px", textAlign: "center" }}>
-              <p style={{ color: "var(--text-secondary)", fontSize: "16px" }}>
+            <div
+              style={{
+                gridColumn: "1 / -1",
+                background: "white",
+                padding: "60px 40px",
+                textAlign: "center",
+                borderRadius: "12px",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              <p style={{ color: "#666", fontSize: "16px", margin: 0 }}>
                 Você ainda não tem metas cadastradas.
                 <br />
                 Clique em "Nova Meta" para começar!
@@ -184,14 +190,13 @@ export default function GoalsPage() {
           ) : (
             goals.map((goal) => (
               <GoalCard
-                key={goal.id}
-                id={goal.id}
+                key={goal.uuid}
+                uuid={goal.uuid}
                 name={goal.name}
                 current={goal.current}
                 target={goal.target}
-                category={goal.category}
                 onEdit={() => openEditModal(goal)}
-                onDelete={() => deleteGoal(goal.id)}
+                onDelete={() => deleteGoal(goal.uuid)}
               />
             ))
           )}
@@ -203,63 +208,53 @@ export default function GoalsPage() {
           onClose={closeModal}
           title={editingGoal ? "✏️ Editar Meta" : "➕ Nova Meta"}
           centered
+          size="md"
         >
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              saveGoal()
-            }}
-          >
+          <Stack gap="md">
             <TextInput
               label="Nome da Meta"
               placeholder="Ex: Carro Novo"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
-              mb="md"
-            />
-
-            <Select
-              label="Categoria"
-              placeholder="Selecione"
-              data={["Carro", "Casa", "Viagem", "Investimento", "Outros"]}
-              value={formData.category}
-              onChange={(value) => setFormData({ ...formData, category: value || "Carro" })}
-              mb="md"
             />
 
             <NumberInput
               label="Valor Atual (R$)"
               placeholder="0.00"
-              value={formData.current}
-              onChange={(value) => setFormData({ ...formData, current: Number(value) || 0 })}
+              value={current}
+              onChange={(value) => setCurrent(Number(value) || 0)}
               min={0}
               decimalScale={2}
               fixedDecimalScale
-              mb="md"
+              prefix="R$ "
+              thousandSeparator="."
+              decimalSeparator=","
             />
 
             <NumberInput
               label="Valor Meta (R$)"
               placeholder="10000.00"
-              value={formData.target}
-              onChange={(value) => setFormData({ ...formData, target: Number(value) || 0 })}
+              value={target}
+              onChange={(value) => setTarget(Number(value) || 0)}
               min={0}
               decimalScale={2}
               fixedDecimalScale
               required
-              mb="lg"
+              prefix="R$ "
+              thousandSeparator="."
+              decimalSeparator=","
             />
 
-            <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+            <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end", marginTop: "8px" }}>
               <Button variant="outline" onClick={closeModal}>
                 Cancelar
               </Button>
-              <Button type="submit" color="green">
+              <Button color="green" onClick={saveGoal}>
                 {editingGoal ? "Salvar" : "Criar Meta"}
               </Button>
             </div>
-          </form>
+          </Stack>
         </Modal>
       </main>
     </div>

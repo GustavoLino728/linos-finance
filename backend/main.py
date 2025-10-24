@@ -119,6 +119,16 @@ def get_last_transactions(auth_id, worksheet_name="Resumo Mensal",
     
     return transactions
 
+def create_goal_supabase(auth_id, name, goal_value, current_value):
+    data = {
+        "uuid": auth_id,
+        "name": name,
+        "goal_value": goal_value,
+        "current_value": current_value
+    }
+    new_goal = supabase_admin.table("goals").insert(data).execute()
+    return new_goal
+
 def get_balance(auth_id):
     worksheet = get_user_sheets(auth_id, worksheet="Resumo Mensal")
     balance = worksheet.acell('B9').value

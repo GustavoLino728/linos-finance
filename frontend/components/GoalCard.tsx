@@ -3,7 +3,7 @@
 import { Progress } from "@mantine/core"
 
 interface GoalCardProps {
-  id: string
+  uuid: string
   name: string
   current: number
   target: number
@@ -25,11 +25,12 @@ export default function GoalCard({
 
   return (
     <div
-      className="card"
       style={{
+        background: "white",
+        borderRadius: "12px",
         padding: "20px",
-        marginBottom: "16px",
-        position: "relative",
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+        border: "1px solid #e0e0e0",
       }}
     >
       {/* Nome da meta */}
@@ -39,7 +40,7 @@ export default function GoalCard({
             margin: 0,
             fontSize: "18px",
             fontWeight: "600",
-            color: "var(--text-primary)",
+            color: "#333",
           }}
         >
           {name}
@@ -48,7 +49,7 @@ export default function GoalCard({
           <span
             style={{
               fontSize: "12px",
-              color: "var(--text-secondary)",
+              color: "#666",
               marginTop: "4px",
               display: "block",
             }}
@@ -71,22 +72,17 @@ export default function GoalCard({
           style={{
             fontSize: "16px",
             fontWeight: "bold",
-            color: isCompleted ? "var(--success)" : "var(--text-primary)",
+            color: isCompleted ? "#2E7D32" : "#333",
           }}
         >
-          R$ {current.toFixed(2).replace(".", ",")}
+          {current.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
         </span>
-        <span
-          style={{
-            fontSize: "14px",
-            color: "var(--text-secondary)",
-          }}
-        >
-          / R$ {target.toFixed(2).replace(".", ",")}
+        <span style={{ fontSize: "14px", color: "#666" }}>
+          / {target.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
         </span>
       </div>
 
-      {/* Barra de progresso */}
+      {/* Barra de progresso do Mantine */}
       <Progress
         value={percentage}
         size="lg"
@@ -101,7 +97,7 @@ export default function GoalCard({
           textAlign: "center",
           fontSize: "14px",
           fontWeight: "600",
-          color: isCompleted ? "var(--success)" : "var(--primary)",
+          color: isCompleted ? "#2E7D32" : "#1976d2",
         }}
       >
         {percentage.toFixed(0)}% {isCompleted && "✓ Concluída!"}
@@ -109,22 +105,19 @@ export default function GoalCard({
 
       {/* Botões de ação */}
       {(onEdit || onDelete) && (
-        <div
-          style={{
-            display: "flex",
-            gap: "8px",
-            marginTop: "16px",
-            justifyContent: "flex-end",
-          }}
-        >
+        <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
           {onEdit && (
             <button
               onClick={onEdit}
-              className="btn"
               style={{
-                padding: "6px 12px",
-                fontSize: "13px",
-                background: "var(--primary)",
+                flex: 1,
+                padding: "8px",
+                fontSize: "14px",
+                border: "none",
+                borderRadius: "6px",
+                background: "#1976d2",
+                color: "white",
+                cursor: "pointer",
               }}
             >
               ✏️ Editar
@@ -133,10 +126,15 @@ export default function GoalCard({
           {onDelete && (
             <button
               onClick={onDelete}
-              className="btn btn-error"
               style={{
-                padding: "6px 12px",
-                fontSize: "13px",
+                flex: 1,
+                padding: "8px",
+                fontSize: "14px",
+                border: "none",
+                borderRadius: "6px",
+                background: "#d32f2f",
+                color: "white",
+                cursor: "pointer",
               }}
             >
               🗑️ Remover
