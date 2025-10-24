@@ -1,16 +1,13 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import React from "react";
 
-import "@mantine/core/styles.css";
 import { MantineProvider, ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
 import "@mantine/notifications/styles.css";
 import { Notifications } from "@mantine/notifications";
-import "@mantine/dates/styles.css";
 
 import { ThemeProvider } from "../contexts/ThemeContext";
 import { AuthProvider } from "../contexts/AuthContext";
 import { BalanceProvider } from "@/contexts/BalanceContext";
-import { Providers } from "@/app/providers";
 
 import "./globals.css";
 
@@ -18,14 +15,18 @@ export const metadata: Metadata = {
   title: "Lino$ Finance",
   description: "Aplicativo de finanças pessoais",
   manifest: "/manifest.json",
-  themeColor: "#2E7D32",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "Lino$",
   },
-  generator: "v0.dev",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#2E7D32",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -40,13 +41,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <MantineProvider defaultColorScheme="auto">
           <Notifications position="top-right" />
-          <Providers>
-            <ThemeProvider>
-              <AuthProvider>
-                <BalanceProvider>{children}</BalanceProvider>
-              </AuthProvider>
-            </ThemeProvider>
-          </Providers>
+          <ThemeProvider>
+            <AuthProvider>
+              <BalanceProvider>{children}</BalanceProvider>
+            </AuthProvider>
+          </ThemeProvider>
         </MantineProvider>
       </body>
     </html>

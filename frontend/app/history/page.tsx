@@ -22,7 +22,17 @@ export default function HistoryPage() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    if (!user || !token) return
+    if (!user || !token) {
+      console.log("❌ DEBUG: Usuário ou token não disponível")
+      console.log("User:", user)
+      console.log("Token:", token)
+      return
+    }
+
+    console.log("✅ DEBUG: Iniciando requisição para o backend")
+    console.log("URL:", `${API_BASE_URL}/transactions/recent`)
+    console.log("Token:", token)
+
     setLoading(true)
     fetch(`${API_BASE_URL}/transactions/recent`, {
       headers: {
@@ -30,12 +40,35 @@ export default function HistoryPage() {
       },
     })
       .then((res) => {
+        console.log("📡 DEBUG: Resposta recebida do servidor")
+        console.log("Status:", res.status)
+        console.log("OK?:", res.ok)
+        
         if (!res.ok) throw new Error("Erro ao buscar transações")
         return res.json()
       })
-      .then((data) => setTransactions(data.transactions || []))
-      .catch(() => setError("Erro ao carregar histórico."))
-      .finally(() => setLoading(false))
+      .then((data) => {
+        console.log("📦 DEBUG: Dados recebidos do backend:", data)
+        console.log("Transações:", data.transactions)
+        console.log("Quantidade de transações:", data.transactions?.length)
+        
+        // Log individual de cada transação
+        if (data.transactions && data.transactions.length > 0) {
+          console.log("🔍 DEBUG: Primeira transação:", data.transactions[0])
+          console.log("Tipo de valor da primeira transação:", typeof data.transactions[0]?.valor)
+          console.log("Valor raw:", data.transactions[0]?.valor)
+        }
+        
+        setTransactions(data.transactions || [])
+      })
+      .catch((err) => {
+        console.error("❌ DEBUG: Erro ao buscar transações:", err)
+        setError("Erro ao carregar histórico.")
+      })
+      .finally(() => {
+        console.log("✅ DEBUG: Requisição finalizada")
+        setLoading(false)
+      })
   }, [user, token])
 
   if (isLoading || loading) {
@@ -50,12 +83,6 @@ export default function HistoryPage() {
     <div className="page-background">
       <Header />
       <main>
-        <h2 style={{ textAlign: "center", margin: "2rem 0 1rem 0" }}>
-          Histórico de Transações<br />
-          <span style={{ fontSize: "1rem", fontWeight: "normal" }}>
-            (Últimas 10 realizadas)
-          </span>
-        </h2>
         {error ? (
           <div style={{ textAlign: "center", color: "red" }}>{error}</div>
         ) : (

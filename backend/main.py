@@ -84,7 +84,7 @@ def save_favorites(auth_id, transaction_type, description, value, category="", p
     return favorito
 
 def get_last_transactions(auth_id, worksheet_name="Resumo Mensal", 
-                                    start_col='D', end_col='I', header_row=2, max_records=10):
+                          start_col='D', end_col='I', header_row=2, max_records=10):
     worksheet = get_user_sheets(auth_id, worksheet=worksheet_name)
     
     col_index_to_check = 5 
@@ -104,12 +104,20 @@ def get_last_transactions(auth_id, worksheet_name="Resumo Mensal",
     
     last_rows = data[-max_records:] if len(data) > max_records else data
     
-    headers = ["Data", "Tipo", "Descrição", "Valor", "Categoria", "Método de Pagamento"]
-    transactions = [dict(zip(headers, row)) for row in last_rows]
+    headers = ["data", "tipo", "descricao", "valor", "categoria", "metodoPagamento"]
     
-    print(transactions)
+    transactions = []
+    for row in last_rows:
+        padded_row = row + [None] * (6 - len(row)) if len(row) < 6 else row[:6]
+        
+        transaction = dict(zip(headers, padded_row))
+        
+        if not transaction.get("valor"):
+            transaction["valor"] = "0.00"
+        
+        transactions.append(transaction)
+    
     return transactions
-
 
 def get_balance(auth_id):
     worksheet = get_user_sheets(auth_id, worksheet="Resumo Mensal")
