@@ -25,12 +25,21 @@ export default function GoalCard({
 
   return (
     <div
+      onClick={onClick}
       style={{
         background: "white",
         borderRadius: "12px",
         padding: "20px",
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
         border: "1px solid #e0e0e0",
+        cursor: onClick ? "pointer" : "default",
+        transition: "transform 0.2s",
+      }}
+      onMouseEnter={(e) => {
+        if (onClick) e.currentTarget.style.transform = "translateY(-4px)"
+      }}
+      onMouseLeave={(e) => {
+        if (onClick) e.currentTarget.style.transform = "translateY(0)"
       }}
     >
       {/* Nome da meta */}
@@ -92,8 +101,11 @@ export default function GoalCard({
       </div>
 
       {/* Botões de ação */}
-      {(onEdit || onDelete || onClick) && (
-        <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
+      {(onEdit || onDelete) && (
+        <div
+          style={{ display: "flex", gap: "8px", marginTop: "16px" }}
+          onClick={(e) => e.stopPropagation()} // Evita abrir modal de aporte ao clicar nos botões
+        >
           {onEdit && (
             <button
               onClick={onEdit}

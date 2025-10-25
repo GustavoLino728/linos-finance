@@ -6,7 +6,7 @@ import Header from "@/components/Header"
 import GoalCard from "@/components/GoalCard"
 import { apiRequest } from "@/utils/api"
 import { notifications } from "@mantine/notifications"
-import { Modal, TextInput, NumberInput, Select, Button, Stack, ModalBase } from "@mantine/core"
+import { Modal, TextInput, NumberInput, Button, Stack } from "@mantine/core"
 
 interface Goal {
   uuid: string
@@ -19,10 +19,17 @@ export default function GoalsPage() {
   const { user, token, isLoading } = useAuth()
   const [goals, setGoals] = useState<Goal[]>([])
   const [loading, setLoading] = useState(true)
+  
+  // Estados para modal de criar/editar
   const [modalOpened, setModalOpened] = useState(false)
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null)
+  
+  // Estados para modal de aporte
+  const [aporteModalOpened, setAporteModalOpened] = useState(false)
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null)
+  const [aporteValue, setAporteValue] = useState<number>(0)
 
-  // Estado do formulário
+  // Estado do formulário criar/editar
   const [name, setName] = useState("")
   const [current_value, setCurrentValue] = useState<number>(0)
   const [goal_value, setGoalValue] = useState<number>(0)
@@ -100,6 +107,69 @@ export default function GoalsPage() {
     }
   }
 
+  // Adiciona aporte à meta
+  const addAporte = async () => {
+    if (!selectedGoal || aporteValue <= 0) {
+      notifications.show({
+        title: "Atenção",
+        message: "Informe um valor válido para o aporte",
+        color: "orange",
+      })
+      return
+    }
+
+    try {
+      const newCurrentValue = selectedGoal.current_value + aporteValue
+
+      // 1. Atualiza o valor da meta no backend
+      const updateResponse = await apiRequest(`/goals/${selectedGoal.uuid}`, {
+        method: "PATCH",
+        body: JSON.stringify({ current_value: newCurrentValue }),
+      })
+
+      if (!updateResponse.ok) {
+        throw new Error("Erro ao atualizar meta")
+      }
+
+      // 2. Cria transação de saída (aporte)
+      const transactionResponse = await apiRequest(`/transactions`, {
+        method: "POST",
+        body: JSON.stringify({
+          data: new Date().toISOString().split("T")[0],
+          transaction_type: "saida",
+          description: `Aporte - ${selectedGoal.name}`,
+          value: aporteValue,
+          category: "Meta",
+          payment_method: "Transferência",
+          parcelado: false,
+          parcelas: 1,
+        }),
+      })
+
+      if (transactionResponse.ok) {
+        notifications.show({
+          title: "Sucesso!",
+          message: `Aporte de ${aporteValue.toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+          })} realizado!`,
+          color: "green",
+        })
+        loadGoals()
+        closeAporteModal()
+      } else {
+        throw new Error("Erro ao criar transação")
+      }
+    } catch (error) {
+      console.error("Erro ao adicionar aporte:", error)
+      notifications.show({
+        title: "Erro",
+        message: "Não foi possível adicionar o aporte",
+        color: "red",
+      })
+    }
+  }
+
   // Abre modal para edição
   const openEditModal = (goal: Goal) => {
     setEditingGoal(goal)
@@ -109,6 +179,7 @@ export default function GoalsPage() {
     setModalOpened(true)
   }
 
+  // Abre modal para nova meta
   const openNewModal = () => {
     setEditingGoal(null)
     setName("")
@@ -116,17 +187,24 @@ export default function GoalsPage() {
     setGoalValue(0)
     setModalOpened(true)
   }
-  const openGoalModal = () => {
-    setEditingGoal(null)
-    setName("")
-    setCurrentValue(0)
-    setGoalValue(0)
-    setModalOpened(true)
+
+  // Abre modal de aporte
+  const openAporteModal = (goal: Goal) => {
+    setSelectedGoal(goal)
+    setAporteValue(0)
+    setAporteModalOpened(true)
   }
 
+  // Fecha modais
   const closeModal = () => {
     setModalOpened(false)
     setEditingGoal(null)
+  }
+
+  const closeAporteModal = () => {
+    setAporteModalOpened(false)
+    setSelectedGoal(null)
+    setAporteValue(0)
   }
 
   useEffect(() => {
@@ -202,7 +280,7 @@ export default function GoalsPage() {
                 name={goal.name}
                 current_value={goal.current_value}
                 goal_value={goal.goal_value}
-                onClick={() => openGoalModal}
+                onClick={() => openAporteModal(goal)}
                 onEdit={() => openEditModal(goal)}
                 onDelete={() => deleteGoal(goal.uuid)}
               />
@@ -265,26 +343,61 @@ export default function GoalsPage() {
           </Stack>
         </Modal>
 
-        <Modal 
-          opened={modalOpened}
-          onClose={closeModal}
-          title={goals.name}
+        {/* Modal de Aporte */}
+        <Modal
+          opened={aporteModalOpened}
+          onClose={closeAporteModal}
+          title={`💰 Adicionar Aporte - ${selectedGoal?.name || ""}`}
           centered
-          size="md">
+          size="md"
+        >
           <Stack gap="md">
+            {/* Informações da meta */}
+            <div
+              style={{
+                background: "#f5f5f5",
+                padding: "16px",
+                borderRadius: "8px",
+              }}
+            >
+              <div style={{ marginBottom: "8px" }}>
+                <strong>Valor Atual:</strong>{" "}
+                {selectedGoal?.current_value.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+              </div>
+              <div>
+                <strong>Meta:</strong>{" "}
+                {selectedGoal?.goal_value.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+              </div>
+            </div>
+
             <NumberInput
-                label="Valor do Aporte (R$)"
-                placeholder="0.00"
-                value={current_value}
-                onChange={(value) => setCurrentValue(Number(value) || 0)}
-                min={0}
-                decimalScale={2}
-                fixedDecimalScale
-                prefix="R$ "
-                thousandSeparator="."
-                decimalSeparator=","
-              />
-          <Stack/>
+              label="Valor do Aporte (R$)"
+              placeholder="0.00"
+              value={aporteValue}
+              onChange={(value) => setAporteValue(Number(value) || 0)}
+              min={0}
+              decimalScale={2}
+              fixedDecimalScale
+              prefix="R$ "
+              thousandSeparator="."
+              decimalSeparator=","
+            />
+
+            <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end", marginTop: "8px" }}>
+              <Button variant="outline" onClick={closeAporteModal}>
+                Cancelar
+              </Button>
+              <Button color="green" onClick={addAporte}>
+                Adicionar Aporte
+              </Button>
+            </div>
+          </Stack>
         </Modal>
       </main>
     </div>

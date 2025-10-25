@@ -38,3 +38,12 @@ def delete_goal(id):
     auth_id = g.auth_id
     supabase_admin.table("goals").delete().eq("auth_id", auth_id).eq("uuid", id).execute()
     return jsonify({"mensagem" : "Meta deletada com sucesso"}), 200
+
+@goals_bp.route("/goals/<id>", methods=['PATCH'])
+@requires_auth
+def aport_goal(id):
+    data = request.get_json()
+    current_value = data['current_value']
+    auth_id = g.auth_id
+    supabase_admin.table("goals").update({"current_value": current_value}).eq("auth_id", auth_id).eq("uuid", id).execute()
+    return jsonify({"mensagem" : "Meta deletada com sucesso"}), 200
