@@ -23,9 +23,14 @@ export default function TransactionCard({
   onDelete,
   showActions = false,
 }: TransactionCardProps) {
-  // Normaliza o valor para número
   const normalizedValue = typeof value === "string" 
-    ? parseFloat(value.replace("R$", "").replace(/\s/g, "").replace(",", ".")) || 0
+    ? parseFloat(
+        value
+          .replace("R$", "")           
+          .replace(/\s/g, "")          
+          .replace(/\./g, "")  
+          .replace(",", ".")         
+      ) || 0
     : value
 
   return (

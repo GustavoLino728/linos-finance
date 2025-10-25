@@ -33,27 +33,29 @@ export default function HistoryPage() {
         return res.json()
       })
       .then((data) => {
-      const normalized: Transaction[] = (data.transactions || []).map((t: any) => {
-        const rawDate = t.data || t.Data
+        const reversedTransactions = (data.transactions || []).reverse()
         
-        let formattedDate = rawDate
-        if (rawDate && rawDate.includes('-')) {
-          const [year, month, day] = rawDate.split('-')
-          formattedDate = `${day}/${month}/${year}`
-        }
+        const normalized: Transaction[] = reversedTransactions.map((t: any) => {
+          const rawDate = t.data || t.Data
+          
+          let formattedDate = rawDate
+          if (rawDate && rawDate.includes('-')) {
+            const [year, month, day] = rawDate.split('-')
+            formattedDate = `${day}/${month}/${year}`
+          }
 
-        return {
-          data: formattedDate,
-          tipo: t.tipo || t.Tipo,
-          descricao: t.descricao || t.Descrição || t.descrição,
-          valor: t.valor || t.Valor || "0.00",
-          categoria: t.categoria || t.Categoria,
-          metodoPagamento: t.metodoPagamento || t["Método de Pagamento"],
-        }
+          return {
+            data: formattedDate,
+            tipo: t.tipo || t.Tipo,
+            descricao: t.descricao || t.Descrição || t.descrição,
+            valor: t.valor || t.Valor || "0.00",
+            categoria: t.categoria || t.Categoria,
+            metodoPagamento: t.metodoPagamento || t["Método de Pagamento"],
+          }
+        })
+
+        setTransactions(normalized)
       })
-
-      setTransactions(normalized.reverse()) 
-    })
 
       .catch((err) => {
         console.error("❌ Erro:", err)
