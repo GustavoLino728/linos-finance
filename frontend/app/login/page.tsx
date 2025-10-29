@@ -22,6 +22,7 @@ export default function LoginPage() {
         <div className="container" style={{ maxWidth: "400px" }}>
           <LoginForm 
             onSwitchToRegister={() => router.push("/register")} 
+            onSwitchToResetPassword={() => router.push("/forgot-password")}
             onSuccess={() => router.push("/")}
           />
         </div>

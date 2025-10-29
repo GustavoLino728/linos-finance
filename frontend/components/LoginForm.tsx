@@ -5,10 +5,11 @@ import { useAuth } from "../contexts/AuthContext"
 
 interface LoginFormProps {
   onSwitchToRegister: () => void
+  onSwitchToResetPassword: () => void
   onSuccess: () => void
 }
 
-export default function LoginForm({ onSwitchToRegister, onSuccess }: LoginFormProps) {
+export default function LoginForm({ onSwitchToRegister, onSwitchToResetPassword, onSuccess }: LoginFormProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -88,6 +89,20 @@ export default function LoginForm({ onSwitchToRegister, onSuccess }: LoginFormPr
           }}
         >
           Cadastre-se aqui
+        </button>
+        <span style={{ color: "var(--text-secondary)" }}>Esqueceu a senha? </span>
+        <button
+          onClick={onSwitchToResetPassword}
+          style={{
+            background: "none",
+            border: "none",
+            color: "var(--primary)",
+            textDecoration: "underline",
+            cursor: "pointer",
+            fontSize: "16px",
+          }}
+        >
+          Clique aqui
         </button>
       </div>
     </div>

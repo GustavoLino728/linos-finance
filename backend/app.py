@@ -1,14 +1,20 @@
-from main import create_transaction, get_balance, get_last_transactions
+from flask_cors import CORS
+from flask import request, jsonify, Flask, g
 from routes.auth import auth_bp
 from routes.favorites import favorites_bp
 from routes.goals import goals_bp
-from supabaseClient import supabase
+from main import create_transaction, get_balance, get_last_transactions
 from auth_middleware import requires_auth
-from flask import request, jsonify, Flask, g
-from flask_cors import CORS
+from rate_limiter import limiter
+from email_service import init_mail
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
 app = Flask(__name__)
+init_mail(app)
+limiter.init_app(app)
 
 origins = [
     "http://localhost:3000",
