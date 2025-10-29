@@ -18,7 +18,7 @@ limiter.init_app(app)
 
 origins = [
     "http://localhost:3000",
-    "https://organizacao-financeira-app.vercel.app"
+    "https://linos-finance.vercel.app"
 ]
 
 CORS(app, resources={r"/*": {"origins": origins}}, supports_credentials=True)
@@ -26,6 +26,10 @@ CORS(app, resources={r"/*": {"origins": origins}}, supports_credentials=True)
 app.register_blueprint(auth_bp)
 app.register_blueprint(favorites_bp)
 app.register_blueprint(goals_bp)
+
+@app.route('/', methods=['GET'])
+def online_check():
+    return jsonify({"mensagem": "A API está online"}), 200
 
 @app.route('/transactions', methods=['POST'])
 @requires_auth

@@ -8,7 +8,7 @@ from main import create_goal_supabase
 goals_bp = Blueprint('goals', __name__)
 origins = [
     "http://localhost:3000",
-    "https://organizacao-financeira-app.vercel.app"
+    "https://linos-finance.vercel.app"
 ]
 
 CORS(goals_bp, resources={r"/*": {"origins": origins}}, supports_credentials=True)

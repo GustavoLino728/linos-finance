@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { useAuth } from "../contexts/AuthContext"
+import { TextInput, PasswordInput, Button } from "@mantine/core"
+
 
 interface LoginFormProps {
   onSwitchToRegister: () => void
@@ -37,70 +39,46 @@ export default function LoginForm({ onSwitchToRegister, onSwitchToResetPassword,
   return (
     <div className="card">
       <div className="title-with-gradient">
-        <h1 style={{ fontSize: "28px", margin: 0 }}>Login</h1>
+        <h1 style={{ fontSize: 28, margin: 0 }}>Login</h1>
         <p className="subtitle-text">Entre com suas credenciais para acessar</p>
       </div>
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="email" className="label">Email</label>
-          <input
-            id="email"
-            type="email"
-            className="input"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="seu@email.com"
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password" className="label">Senha</label>
-          <input
-            id="password"
-            type="password"
-            className="input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            required
-          />
-        </div>
+        <TextInput
+          label="Email"
+          type="email"
+          placeholder="seu@email.com"
+          value={email}
+          onChange={(e) => setEmail(e.currentTarget.value)}
+          required
+          size="md"
+          mb="md"
+        />
+        <PasswordInput
+          label="Senha"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.currentTarget.value)}
+          required
+          size="md"
+          mb="md"
+        />
         {error && <div className="error-message">{error}</div>}
-        <button
-          type="submit"
-          className="btn btn-primary"
-          disabled={isLoading}
-          style={{ width: "100%", marginBottom: "16px" }}
-        >
+        <Button type="submit" fullWidth loading={isLoading} size="md" style={{ marginBottom: 16 }}>
           {isLoading ? "Entrando..." : "Entrar"}
-        </button>
+        </Button>
       </form>
       <div style={{ textAlign: "center" }}>
         <span style={{ color: "var(--text-secondary)" }}>Não tem uma conta? </span>
         <button
           onClick={onSwitchToRegister}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--primary)",
-            textDecoration: "underline",
-            cursor: "pointer",
-            fontSize: "16px",
-          }}
+          style={{ background: "none", border: "none", color: "var(--primary)", textDecoration: "underline", cursor: "pointer", fontSize: 16 }}
         >
           Cadastre-se aqui
         </button>
-        <span style={{ color: "var(--text-secondary)" }}>Esqueceu a senha? </span>
+        <span style={{ color: "var(--text-secondary)" }}> Esqueceu a senha? </span>
         <button
           onClick={onSwitchToResetPassword}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--primary)",
-            textDecoration: "underline",
-            cursor: "pointer",
-            fontSize: "16px",
-          }}
+          style={{ background: "none", border: "none", color: "var(--primary)", textDecoration: "underline", cursor: "pointer", fontSize: 16 }}
         >
           Clique aqui
         </button>

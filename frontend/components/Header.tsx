@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { useRouter } from "next/navigation";
@@ -14,11 +14,17 @@ export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
 
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const menuItems = user
     ? [
         { label: "Home", id: "", icon: House },
         { label: "Histórico de Transações", id: "history", icon: Clock },
-        { label: "Relatório Semanal", id: "relatory", icon: BookOpen },
+        { label: "Relatório Semanal", id: "report", icon: BookOpen },
         { label: "Pagamentos Programados", id: "recurrent", icon: Calendar },
         { label: "Metas", id: "goals", icon: Target },
       ]
@@ -67,12 +73,12 @@ export default function Header() {
                 onClick={toggleTheme}
                 aria-label={`Mudar para tema ${theme === "light" ? "escuro" : "claro"}`}
               >
-                {/* ← AQUI: Trocar emoji por ícone Lucide */}
-                {theme === "light" ? (
-                  <Moon size={26} color="var(--text-primary)" />
-                ) : (
-                  <Sun size={26} color="var(--text-primary)" />
-                )}
+                {isClient &&
+                  (theme === "light" ? (
+                    <Moon size={26} color="var(--text-primary)" />
+                  ) : (
+                    <Sun size={26} color="var(--text-primary)" />
+                  ))}
               </button>
               {user && (
                 <button

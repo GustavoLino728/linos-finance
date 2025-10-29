@@ -7,7 +7,7 @@ from flask_cors import CORS
 favorites_bp = Blueprint('favorites', __name__)
 origins = [
     "http://localhost:3000",
-    "https://organizacao-financeira-app.vercel.app"
+    "https://linos-finance.vercel.app"
 ]
 
 CORS(favorites_bp, resources={r"/*": {"origins": origins}}, supports_credentials=True)

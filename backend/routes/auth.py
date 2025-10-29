@@ -13,7 +13,7 @@ load_dotenv()
 auth_bp = Blueprint('auth', __name__)
 origins = [
     "http://localhost:3000",
-    "https://organizacao-financeira-app.vercel.app"
+    "https://linos-finance.vercel.app"
 ]
 
 CORS(auth_bp, resources={r"/*": {"origins": origins}}, supports_credentials=True)
