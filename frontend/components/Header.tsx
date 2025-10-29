@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { useRouter } from "next/navigation";
+import { House, Clock, BookOpen, Calendar, Target, Sun, Moon } from "lucide-react";
+
 import Link from "next/link";
 
 export default function Header() {
@@ -14,11 +16,11 @@ export default function Header() {
 
   const menuItems = user
     ? [
-        { label: "🏠 Home", id: "" },
-        { label: "🕑 Histórico de Transações", id: "history" },
-        { label: "📖 Relatório Semanal", id: "relatory" },
-        { label: "📅 Pagamentos Programados", id: "recurrent" },
-        { label: "🎯 Metas", id: "goals" },
+        { label: "Home", id: "", icon: House },
+        { label: "Histórico de Transações", id: "history", icon: Clock },
+        { label: "Relatório Semanal", id: "relatory", icon: BookOpen },
+        { label: "Pagamentos Programados", id: "recurrent", icon: Calendar },
+        { label: "Metas", id: "goals", icon: Target },
       ]
     : [];
 
@@ -65,7 +67,12 @@ export default function Header() {
                 onClick={toggleTheme}
                 aria-label={`Mudar para tema ${theme === "light" ? "escuro" : "claro"}`}
               >
-                {theme === "light" ? "🌙" : "☀️"}
+                {/* ← AQUI: Trocar emoji por ícone Lucide */}
+                {theme === "light" ? (
+                  <Moon size={26} color="var(--text-primary)" />
+                ) : (
+                  <Sun size={26} color="var(--text-primary)" />
+                )}
               </button>
               {user && (
                 <button
@@ -103,15 +110,21 @@ export default function Header() {
             </div>
 
             <nav className="sidebar-content">
-              {menuItems.map((item) => (
-                <button
-                  key={item.id}
-                  className="sidebar-item"
-                  onClick={() => handleMenuItemClick(item.id)}
-                >
-                  {item.label}
-                </button>
-              ))}
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    className="sidebar-item"
+                    onClick={() => handleMenuItemClick(item.id)}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <Icon size={20} color="var(--primary)" strokeWidth={2} />
+                      <span>{item.label}</span>
+                    </div>
+                  </button>
+                );
+              })}
 
               <div className="sidebar-divider" />
 

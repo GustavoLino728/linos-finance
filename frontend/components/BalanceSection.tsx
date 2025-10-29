@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../contexts/AuthContext"
 import { apiRequest } from "../utils/api"
+import { RefreshCcw, Eye, EyeOff } from "lucide-react"
 
 export default function BalanceSection() {
   const { user } = useAuth()
@@ -59,7 +60,7 @@ export default function BalanceSection() {
             fontWeight: "600",
           }}
           >
-            💰 Saldo Atual
+            Saldo Atual
           </h3>
 
           {isLoading ? (
@@ -95,7 +96,7 @@ export default function BalanceSection() {
           }}
           title={isVisible ? "Ocultar saldo" : "Mostrar saldo"}
         >
-          {isVisible ? "👁️" : "👁️‍🗨️"}
+          {isVisible ? <Eye/> : <EyeOff/>}
         </button>
       </div>
 
@@ -109,7 +110,7 @@ export default function BalanceSection() {
             fontSize: "14px",
           }}
         >
-          🔄 Atualizar Saldo
+          <RefreshCcw size="18"/>Atualizar Saldo
         </button>
       )}
     </div>

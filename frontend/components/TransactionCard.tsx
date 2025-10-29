@@ -1,9 +1,11 @@
 "use client"
 
+import { BanknoteArrowDown, BanknoteArrowUp, Check, Trash2 } from 'lucide-react';
+
 interface TransactionCardProps {
   type: "entrada" | "saida"
   description: string
-  value: number | string  // Aceita tanto número quanto string
+  value: number | string 
   date?: string
   category?: string
   paymentMethod?: string
@@ -46,9 +48,12 @@ export default function TransactionCard({
             marginBottom: "4px",
           }}
         >
-          <span style={{ fontSize: "18px" }}>
-            {type === "entrada" ? "💰" : "💸"}
-          </span>
+          {type === "entrada" ? (
+            <BanknoteArrowUp size={26} style={{ color: "var(--success)" }} />
+          ) : (
+            <BanknoteArrowDown size={26} style={{ color: "var(--error)" }} />
+          )}
+
           <strong style={{ color: "var(--text-primary)" }}>
             {description}
           </strong>
@@ -99,7 +104,7 @@ export default function TransactionCard({
               onClick={onExecute}
               style={{ padding: "8px 12px", fontSize: "14px" }}
             >
-              ✅ Executar
+              <Check/> Executar
             </button>
           )}
           {onDelete && (
@@ -108,7 +113,7 @@ export default function TransactionCard({
               onClick={onDelete}
               style={{ padding: "8px 12px", fontSize: "14px" }}
             >
-              🗑️ Remover
+              <Trash2/> Remover
             </button>
           )}
         </div>

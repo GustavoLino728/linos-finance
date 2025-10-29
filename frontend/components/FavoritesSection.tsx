@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useBalance } from "../contexts/BalanceContext"
 import { apiRequest } from "../utils/api"
 import TransactionCard from "./TransactionCard"
+import { Star } from "lucide-react"
 
 interface Favorito {
   id: string
@@ -98,7 +99,7 @@ export default function FavoritesSection() {
   return (
     <div className="card">
       <div className="title-with-gradient">
-        <h2 style={{ fontSize: "24px", margin: 0 }}>⭐ Meus Favoritos</h2>
+        <h2 style={{ fontSize: "24px", margin: 0 }}><Star/> Meus Favoritos</h2>
       </div>
 
       {message && (

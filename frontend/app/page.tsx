@@ -8,6 +8,7 @@ import TransactionForm from "@/components/TransactionForm"
 import FavoritesSection from "@/components/FavoritesSection"
 import { useState } from "react"
 import { useAuth } from "@/contexts/AuthContext"
+import { Table2 } from "lucide-react"
 
 
 export default function HomePage() {
@@ -33,7 +34,7 @@ export default function HomePage() {
             >
               {user?.sheet_url && (
                 <a href={user.sheet_url} target="_blank" rel="noopener noreferrer" className="floating-sheet-button" aria-label="Abrir planilha">
-                  📊
+                  <Table2 size="36"/>
                 </a>
               )}
               <TransactionForm onSuccess={() => setRefreshFavorites((prev) => prev + 1)} />

@@ -4,6 +4,7 @@ import { useState } from "react"
 import { apiRequest } from "../utils/api"
 import { useBalance } from "@/contexts/BalanceContext"
 import { notifications } from "@mantine/notifications"
+import { BanknoteArrowDown, BanknoteArrowUp, Star } from 'lucide-react'; // ← Importar Star
 
 interface TransactionFormProps {
   onSuccess: () => void
@@ -110,7 +111,8 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
     }
     setIsSavingFavorite(false)
   }
-    return (
+
+  return (
     <div className="card">
       <div className="title-with-gradient">
         <h2 style={{ fontSize: "24px", margin: 0 }}>Adicionar Lançamento</h2>
@@ -118,10 +120,10 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
 
       <div className="tabs">
         <button className={`tab ${activeTab === "entrada" ? "active" : ""}`} onClick={() => setActiveTab("entrada")}>
-          💰 Entrada
+          <BanknoteArrowUp size={26} style={{ color: "var(--success)" }}/> Entrada
         </button>
         <button className={`tab ${activeTab === "saida" ? "active" : ""}`} onClick={() => setActiveTab("saida")}>
-          💸 Saída
+          <BanknoteArrowDown size={26} style={{ color: "var(--error)" }}/> Saída
         </button>
       </div>
 
@@ -252,18 +254,25 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
             className="btn btn-secondary"
             onClick={salvarFavorito}
             disabled={isSavingFavorite || !formData.description || !formData.value}
-            style={{ minWidth: "120px" }}
+            style={{ minWidth: "120px", display: "flex", alignItems: "center", gap: "8px", justifyContent: "center" }}
           >
-            {isSavingFavorite ? "Salvando..." : "⭐ Favorito"}
+            {isSavingFavorite ? (
+              "Salvando..."
+            ) : (
+              <>
+                <Star size={16} />
+                Favorito
+              </>
+            )}
           </button>
         </div>
       </form>
 
-      {/* Modal category */}
+      {/* Modal categoria */}
       {showCategoriaModal && (
         <div className="modal-overlay" onClick={() => setShowCategoriaModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ marginBottom: "16px", color: "var(--primary)" }}>Selecionar category</h3>
+            <h3 style={{ marginBottom: "16px", color: "var(--primary)" }}>Selecionar Categoria</h3>
             {categorias.map((category) => (
               <button
                 key={category}
