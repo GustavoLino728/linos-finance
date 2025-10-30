@@ -1,12 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import React from "react";
+import { ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
 
-import { MantineProvider, ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
-import { Notifications } from "@mantine/notifications";
-
-import { ThemeProvider } from "../contexts/ThemeContext";
-import { AuthProvider } from "../contexts/AuthContext";
-import { BalanceProvider } from "@/contexts/BalanceContext";
+import ThemedMantineProvider from "./providers/ThemedMantineProvider";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 import "@mantine/notifications/styles.css";
 import "@mantine/core/styles.css";
@@ -17,12 +14,10 @@ export const metadata: Metadata = {
   description: "Aplicativo de finanças pessoais",
   icons: {
     icon: [
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
     ],
-    apple: [
-      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
-    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   manifest: "/manifest.json",
   appleWebApp: {
@@ -50,14 +45,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body>
-        <MantineProvider defaultColorScheme="auto">
-          <Notifications position="top-right" />
-          <ThemeProvider>
-            <AuthProvider>
-              <BalanceProvider>{children}</BalanceProvider>
-            </AuthProvider>
-          </ThemeProvider>
-        </MantineProvider>
+        {/* ThemeProvider (client) define data-theme; Mantine fica dentro dele */}
+        <ThemeProvider>
+          <ThemedMantineProvider>{children}</ThemedMantineProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
