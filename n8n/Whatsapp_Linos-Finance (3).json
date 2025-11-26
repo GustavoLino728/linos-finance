@@ -1,0 +1,714 @@
+{
+  "name": "Whatsapp/Linos-Finance",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:5000/transactions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "=Authorization",
+              "value": "=Bearer {{ $node['Gerar Token JWT'].json.token }} "
+            },
+            {
+              "name": "=Content-Type",
+              "value": "=application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"auth_id\": \"{{ $node['Buscar Usuário Telegram'].json.auth_id }}\",\n  \"description\": \"{{ $node['Code in JavaScript'].json.description }}\",\n  \"transaction_type\": \"{{ $node['Code in JavaScript'].json.transaction_type }}\",\n  \"value\": {{ $node['Code in JavaScript'].json.value }},\n  \"data\": \"{{ $node['Code in JavaScript'].json.data }}\",\n  \"category\": \"{{ $node['Code in JavaScript'].json.category }}\",\n  \"payment_method\": \"{{ $node['Code in JavaScript'].json.payment_method }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2464,
+        240
+      ],
+      "id": "f30dfad7-f44f-4661-82ea-814c851f9df1",
+      "name": "Criar Transação"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5000/auth/generate-token",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "=X-API-Key",
+              "value": "=n8n-api-key-2025-a7f4d9e2b1c8x5z9w3q6"
+            },
+            {
+              "name": "=Content-Type",
+              "value": "=application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"user_id\": \"{{ $node['Buscar Usuário Telegram'].json.auth_id }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2256,
+        240
+      ],
+      "id": "bcc77556-47f3-4f37-95d1-10c872e4164c",
+      "name": "Gerar Token JWT"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id || $json.message.audio.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1744,
+        -128
+      ],
+      "id": "7f29713c-6dee-4da0-b77f-7a006d27c5fe",
+      "name": "Get a file",
+      "webhookId": "e6127658-f732-4678-83cd-f930248803fe",
+      "credentials": {
+        "telegramApi": {
+          "id": "9iTn57yef35Yts9n",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1a392829-965a-40e3-9418-2abbb164fe9f",
+              "leftValue": "={{ !!$json.message?.voice || !!$json.message?.audio }}",
+              "rightValue": "audio",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1472,
+        0
+      ],
+      "id": "9b269eb4-8c64-41e5-a958-087c9173e469",
+      "name": "Is_audio"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        -128
+      ],
+      "id": "cd5f7569-ecd5-48c6-8386-8b48cb3788f2",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "II8e5nKfGY6zqHB4",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={% set inputText = $json.content.parts[0].text if $json.content else $node[\"Detectar ação\"].json.text %}\n\nVocê recebeu a seguinte descrição de uma transação financeira:\n\n{{ inputText }}\n\nSua tarefa é extrair e estruturar os dados dessa transação no formato JSON abaixo:\n\n{\n  \"descricao\": \"\",\n  \"categoria\": \"\",\n  \"data\": \"\",\n  \"valor\": 0,\n  \"tipo\": \"\",\n  \"meio_pagamento\": \"\"\n}\n\nRegras de extração:\n\n1. \"descricao\": resuma a transação em poucas palavras baseado na transcrição (ex: \"biscoito na padaria\", \"freelance design\", \"almoço no restaurante\")\n\n2. \"categoria\": classifique em UMA das opções: [\"Alimentação\", \"Transporte\", \"Saúde\", \"Moradia\", \"Lazer\", \"Educação\", \"Trabalho\", \"Outros\"]\n\n3. \"data\": use formato ISO (YYYY-MM-DD)\n   - Se a transcrição mencionar \"hoje\", use: {{ new Date($node[\"Telegram Trigger\"].json.message.date * 1000).toISOString().slice(0,10) }}\n   - Se mencionar \"ontem\", subtraia 1 dia da data acima\n   - Se não mencionar data, use a data da mensagem\n\n4. \"valor\": extraia o valor em reais mencionado (aceite \"R$20\", \"vinte reais\", \"45,50\", etc.). Se não houver valor, use 0\n\n5. \"tipo\": identifique o tipo da transação baseado nos verbos/contexto:\n   - Use \"saida\" se a transcrição indicar gasto/despesa com verbos como:\n     * Gastei, comprei, paguei, adquiri, desembolsei, consumi\n     * Perdi, saiu, debito, despesa, custo\n   - Use \"entrada\" se a transcrição indicar recebimento/ganho com verbos como:\n     * Ganhei, recebi, faturei, lucrei, vendi, embolsei\n     * Entrou, credito, receita, renda, salário\n   - Se não estiver claro, assuma \"saida\" (padrão para despesas)\n\n6. \"meio_pagamento\": se a transcrição mencionar forma de pagamento (pix, débito, crédito, dinheiro, boleto), inclua aqui; caso contrário, deixe vazio \"\"\n\nCRÍTICO - Formato de resposta:\n- Retorne SOMENTE o objeto JSON válido\n- NÃO adicione `````` no início/fim\n- NÃO adicione explicações ou comentários\n- Comece direto com {\n- Use APENAS as informações da transcrição acima, não invente dados\n\nExemplos de resposta válida:\n\nTranscrição: \"Gastei R$20 em um biscoito hoje\"\n{\n  \"descricao\": \"biscoito\",\n  \"categoria\": \"Alimentação\",\n  \"data\": \"{{ new Date($node[\"Telegram Trigger\"].json.message.date * 1000).toISOString().slice(0,10) }}\",\n  \"valor\": 20.00,\n  \"tipo\": \"saida\",\n  \"meio_pagamento\": \"\"\n}\n\nTranscrição: \"Recebi R$500 de freelance por pix\"\n{\n  \"descricao\": \"freelance\",\n  \"categoria\": \"Trabalho\",\n  \"data\": \"{{ new Date($node[\"Telegram Trigger\"].json.message.date * 1000).toISOString().slice(0,10) }}\",\n  \"valor\": 500.00,\n  \"tipo\": \"entrada\",\n  \"meio_pagamento\": \"pix\"\n}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        2144,
+        16
+      ],
+      "id": "84fb6617-eb7a-426a-b481-8ee5332ecc99",
+      "name": "Format Data",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "II8e5nKfGY6zqHB4",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        32
+      ],
+      "id": "94122ff2-74f3-44ab-ad29-9fd01a863731",
+      "name": "Telegram Trigger",
+      "webhookId": "b58970f0-a1ae-4651-a86a-78dffd752c41",
+      "credentials": {
+        "telegramApi": {
+          "id": "9iTn57yef35Yts9n",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.content.parts.text;\n\n// Limpar markdown\nlet cleaned = raw.trim();\nif (cleaned.startsWith('```json')) cleaned = cleaned.slice(7);\nif (cleaned.startsWith('```\nif (cleaned.endsWith('```')) cleaned = cleaned.slice(0, -3);\nif (cleaned.charCodeAt(0) === 0xFEFF) cleaned = cleaned.slice(1);\ncleaned = cleaned.trim();\n\n// Parse JSON\nlet data;\ntry {\n  data = JSON.parse(cleaned);\n} catch (e) {\n  throw new Error(\"Erro ao fazer parse: \" + e.message + \"\\nConteúdo:\\n\" + cleaned);\n}\n\n// Pegar telegram_id do node \"Detectar ação\"\nconst telegramId = $node[\"Detectar ação\"].json.telegram_id;\nconst chatId = $node[\"Detectar ação\"].json.chat_id;\n\n// Retornar dados normalizados\nreturn [{\n  description: data.descricao || '',\n  category: data.categoria || 'Outros',\n  data: data.data || new Date().toISOString().slice(0, 10),\n  transaction_type: data.tipo || 'saida',\n  value: Number(data.valor) || 0,\n  payment_method: data.meio_pagamento || '',\n  telegram_id: telegramId,\n  chat_id: chatId,\n  sender: telegramId\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2480,
+        16
+      ],
+      "id": "03852beb-378a-4b85-9194-17cca6ca376d",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = $input.first().json.message;\n\nif (!message) {\n  return [{ json: { action: 'ignore' } }];\n}\n\nconst text = message.text || '';\nconst telegramId = message.from.id.toString();\nconst firstName = message.from.first_name || '';\nconst lastName = message.from.last_name || '';\nconst chatId = message.chat.id;\n\n// Detectar comando /sincronizar\nif (text.startsWith('/sincronizar ')) {\n  const code = text.replace('/sincronizar ', '').trim().toUpperCase();\n  \n  return [{\n    json: {\n      action: 'sync',\n      code: code,\n      telegram_id: telegramId,\n      first_name: firstName,\n      last_name: lastName,\n      chat_id: chatId\n    }\n  }];\n}\n\n// Detectar comando /start ou /ajuda\nif (text === '/start' || text === '/ajuda' || text === '/help') {\n  return [{\n    json: {\n      action: 'help',\n      chat_id: chatId,\n      first_name: firstName\n    }\n  }];\n}\n\n// Detectar áudio/voz\nif (message.voice || message.audio) {\n  return [{\n    json: {\n      action: 'transaction',\n      input_type: 'audio',\n      telegram_id: telegramId,\n      first_name: firstName,\n      last_name: lastName,\n      chat_id: chatId,\n      message: message,\n      update_id: $input.first().json.update_id\n    }\n  }];\n}\n\n// Detectar texto de transação (qualquer texto que não seja comando)\nif (text && !text.startsWith('/')) {\n  return [{\n    json: {\n      action: 'transaction',\n      input_type: 'text',\n      telegram_id: telegramId,\n      first_name: firstName,\n      last_name: lastName,\n      chat_id: chatId,\n      text: text,\n      message: message,\n      update_id: $input.first().json.update_id\n    }\n  }];\n}\n\n// Comando desconhecido\nreturn [{\n  json: {\n    action: 'unknown',\n    chat_id: chatId,\n    text: text\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        32
+      ],
+      "id": "3a63a4c5-e579-49af-b842-29dd307be89c",
+      "name": "Detectar ação"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "sync",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "a89af646-5916-443a-8c46-081993337a16"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a1f71c3b-fd9b-4022-977f-0767ce79ba13",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "transaction",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e81b0e4c-1200-477e-a959-2f5fa9d0879a",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "help",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c24bc38a-d6b1-4df0-adff-66232545a28f",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        800,
+        0
+      ],
+      "id": "cdb0db94-6a01-437d-b1fc-51f9318da9af",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:5000/integrations/telegram/sync",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "=Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"code\": \"{{ $json.code }}\",\n  \"telegram_id\": \"{{ $json.telegram_id }}\",\n  \"first_name\": \"{{ $json.first_name }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1056,
+        -224
+      ],
+      "id": "8c80c93f-7193-43c1-8c3f-e61aeb7dd474",
+      "name": "Sincronizar Telegram"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "efe2da28-0acc-4822-9736-d66248837a56",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1248,
+        -224
+      ],
+      "id": "a146145c-feec-433c-b5c9-01b2710904f8",
+      "name": "Sincronização OK?"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $node[\"Detectar ação\"].json.chat_id }}",
+        "text": "=✅ Telegram sincronizado com sucesso!  Olá {{ $node[\"Detectar ação\"].json.first_name }}!  Agora você pode enviar transações por:  📝 TEXTO: \"Gastei 50 reais no supermercado\" \"Recebi 200 de freelance por pix\"  🎤 ÁUDIO: Grave e envie sua voz descrevendo a transação  Suas transações aparecerão automaticamente no Lino$ Finance! 💰",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1472,
+        -352
+      ],
+      "id": "30ca0815-b92d-4d4f-978f-4860308835aa",
+      "name": "Send a text message",
+      "webhookId": "95feb759-f695-4552-81d2-10a88c92ad0a",
+      "credentials": {
+        "telegramApi": {
+          "id": "9iTn57yef35Yts9n",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $node[\"Detectar ação\"].json.chat_id }}",
+        "text": "=❌ Erro ao sincronizar: {{ $json.error || 'Código inválido ou expirado' }}\n\nPara sincronizar sua conta Lino$ Finance:\n\n1️⃣ Acesse https://linosfinance.com\n2️⃣ Faça login na sua conta\n3️⃣ Vá em ⚙️ Configurações → Integrações\n4️⃣ Clique em \"Conectar Telegram\"\n5️⃣ Copie o código de 6 dígitos\n6️⃣ Envie aqui: /sincronizar CODIGO\n\n⏰ O código expira em 5 minutos.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1472,
+        -208
+      ],
+      "id": "a6b753a9-4276-45cc-9838-8170925b0ce6",
+      "name": "Erro Sincronização",
+      "webhookId": "95feb759-f695-4552-81d2-10a88c92ad0a",
+      "credentials": {
+        "telegramApi": {
+          "id": "9iTn57yef35Yts9n",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "77bb81a6-d928-4baa-89c0-82690fca1560",
+              "leftValue": "={{ $json.auth_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1248,
+        16
+      ],
+      "id": "f0bfb91c-9569-41a1-adce-7bd2585ca96e",
+      "name": "Usuário Sincronizado?"
+    },
+    {
+      "parameters": {
+        "chatId": "=={{ $node[\"Detectar ação\"].json.chat_id }}",
+        "text": "⚠️ Telegram não sincronizado  Para usar o bot, sincronize sua conta Lino$ Finance:  1️⃣ Acesse https://linosfinance.com 2️⃣ Faça login na sua conta 3️⃣ Vá em ⚙️ Configurações → Integrações 4️⃣ Clique em \"Conectar Telegram\" 5️⃣ Copie o código de 6 dígitos 6️⃣ Envie aqui: /sincronizar CODIGO  📱 Ainda não tem conta? Cadastre-se em https://linosfinance.com",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1472,
+        160
+      ],
+      "id": "6b8aa596-8aa3-4c49-a8e5-74119abb6a95",
+      "name": "Solicitar Sincronização",
+      "webhookId": "1315ec6e-f95c-4148-900c-4f43467560a4",
+      "credentials": {
+        "telegramApi": {
+          "id": "9iTn57yef35Yts9n",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=http://host.docker.internal:5000/user/by-telegram/{{ $node[\"Detectar ação\"].json.telegram_id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1056,
+        16
+      ],
+      "id": "20e7e0af-ce62-4c41-847b-f5de7a31eee9",
+      "name": "Buscar Usuário Telegram",
+      "retryOnFail": true,
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gerar Token JWT": {
+      "main": [
+        [
+          {
+            "node": "Criar Transação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Transação": {
+      "main": [
+        []
+      ]
+    },
+    "Is_audio": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Format Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Data": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Detectar ação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Gerar Token JWT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detectar ação": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Sincronizar Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar Usuário Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        []
+      ]
+    },
+    "Sincronizar Telegram": {
+      "main": [
+        [
+          {
+            "node": "Sincronização OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sincronização OK?": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro Sincronização",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "Usuário Sincronizado?": {
+      "main": [
+        [
+          {
+            "node": "Is_audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Solicitar Sincronização",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Usuário Telegram": {
+      "main": [
+        [
+          {
+            "node": "Usuário Sincronizado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a8117d3f-67d9-4831-8403-0b42a1f50f05",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6f797282dd12c639e28680f4cd9bc9468db90f9ede664aaa3de65ac1c539c788"
+  },
+  "id": "R5ABB3qlUTT7eduy",
+  "tags": []
+}

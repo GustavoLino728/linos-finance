@@ -4,6 +4,8 @@ from rate_limiter import limiter
 from supabaseClient import supabase, supabase_admin
 from dotenv import load_dotenv
 from email_service import send_reset_email
+import jwt
+from datetime import datetime, timedelta
 import os
 import re
 
@@ -170,3 +172,37 @@ def reset_password():
         import traceback
         print(traceback.format_exc())
         return jsonify({"erro": "Erro ao atualizar senha. O link pode ter expirado."}), 500
+    
+@auth_bp.route('/auth/generate-token', methods=['POST'])
+def generate_token():
+    """Gera um JWT temporário para automação n8n"""
+    # Validar API key do n8n
+    api_key = request.headers.get('X-API-Key')
+    if api_key != os.getenv('N8N_API_KEY', 'sua-api-key-super-secreta'):
+        return jsonify({"erro": "API key inválida"}), 401
+    
+    try:
+        data = request.get_json()
+        auth_id = data.get('auth_id')
+        
+        if not auth_id:
+            return jsonify({"erro": "auth_id é obrigatório"}), 400
+        
+        # Gerar JWT com expiration de 5 minutos
+        from datetime import datetime, timedelta
+        payload = {
+            'sub': auth_id,
+            'aud': 'authenticated',
+            'exp': datetime.utcnow() + timedelta(minutes=60),  # ⏰ Expira em 5 minutos
+            'iat': datetime.utcnow()
+        }
+        
+        token = jwt.encode(payload, os.getenv("JWT_SECRET"), algorithm='HS256')
+        
+        return jsonify({
+            "token": token,
+            "expires_in": 3600  # 5 minutos em segundos
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 400

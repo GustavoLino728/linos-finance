@@ -1,0 +1,35 @@
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n-test
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    env_file:
+      - .env            # <-- Adicione esta linha para carregar variáveis do .env
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE:-true}
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-America/Sao_Paulo}
+      - DB_TYPE=sqlite
+      - N8N_DB_SQLITE_PATH=/home/node/.n8n/database.sqlite
+      - N8N_DIAGNOSTICS_ENABLED=false
+      - NODE_OPTIONS=--max-old-space-size=512
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - WEBHOOK_URL=${WEBHOOK_URL}
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PROTOCOL=${N8N_PROTOCOL:-https}
+      - N8N_PORT=5678
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./local-files:/files
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: '0.8'
+
+volumes:
+  n8n_data:
+    external: true

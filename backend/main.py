@@ -5,6 +5,8 @@ from datetime import datetime
 from supabaseClient import supabase, supabase_admin
 from dateutil.relativedelta import relativedelta
 from google.oauth2.service_account import Credentials
+from datetime import datetime
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -134,3 +136,32 @@ def get_balance(auth_id):
     worksheet = get_user_sheets(auth_id, worksheet="Resumo Mensal")
     balance = worksheet.acell('B9').value
     return balance
+
+def get_spend_goal_progress(auth_id):
+    user = supabase.table("user_profiles").select("spend_goal").eq("auth_id", auth_id).single().execute()
+    if not user.data or not user.data.get("spend_goal"):
+        return {"error": "Meta mensal não definida"}
+
+    meta = user.data["spend_goal"]
+
+    hoje = datetime.utcnow()
+    mes_ano = hoje.strftime("%Y-%m")
+
+    gastos_result = supabase.table("transactions")\
+        .select("value")\
+        .eq("auth_id", auth_id)\
+        .eq("transaction_type", "saida")\
+        .like("data", f"{mes_ano}%")\
+        .execute()
+
+    total_gasto = sum(tx["value"] for tx in gastos_result.data) if gastos_result.data else 0
+
+    saldo_restante = meta - total_gasto
+    if saldo_restante < 0:
+        saldo_restante = 0
+
+    return {
+        "meta_mensal": meta,
+        "total_gastos": total_gasto,
+        "saldo_restante": saldo_restante
+    }

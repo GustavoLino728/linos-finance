@@ -6,6 +6,7 @@ import WelcomeSection from "@/components/WelcomeSection"
 import BalanceSection from "@/components/BalanceSection"
 import TransactionForm from "@/components/TransactionForm"
 import FavoritesSection from "@/components/FavoritesSection"
+import TelegramSync from "@/components/TelegramSync"
 import { useState } from "react"
 import { useAuth } from "@/contexts/AuthContext"
 import { Table2 } from "lucide-react"
@@ -39,6 +40,7 @@ export default function HomePage() {
               )}
               <TransactionForm onSuccess={() => setRefreshFavorites((prev) => prev + 1)} />
               <FavoritesSection key={refreshFavorites} />
+              <TelegramSync/>
             </div>
           </div>
         </main>
