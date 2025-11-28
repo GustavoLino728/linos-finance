@@ -132,36 +132,52 @@ def create_goal_supabase(auth_id, name, goal_value, current_value):
     new_goal = supabase_admin.table("goals").insert(data).execute()
     return new_goal
 
-def get_balance(auth_id):
+def update_user_spend_goal(auth_id, spend_goal):
+    """
+    Atualiza a meta mensal de gastos do usuário
+    
+    Args:
+        auth_id: UUID do usuário
+        spend_goal: Novo valor da meta mensal
+        
+    Returns:
+        bool: True se atualizado com sucesso, False caso contrário
+    """
+    try:
+        supabase.table("user_profiles")\
+            .update({"spend_goal": spend_goal})\
+            .eq("auth_id", auth_id)\
+            .execute()
+        return True
+    except Exception as e:
+        print(f"Erro ao atualizar meta mensal: {e}")
+        return False
+
+def get_sheets_cell(auth_id, cell):
     worksheet = get_user_sheets(auth_id, worksheet="Resumo Mensal")
-    balance = worksheet.acell('B9').value
+    balance = worksheet.acell(cell).value
     return balance
 
-def get_spend_goal_progress(auth_id):
-    user = supabase.table("user_profiles").select("spend_goal").eq("auth_id", auth_id).single().execute()
-    if not user.data or not user.data.get("spend_goal"):
-        return {"error": "Meta mensal não definida"}
-
-    meta = user.data["spend_goal"]
-
-    hoje = datetime.utcnow()
-    mes_ano = hoje.strftime("%Y-%m")
-
-    gastos_result = supabase.table("transactions")\
-        .select("value")\
-        .eq("auth_id", auth_id)\
-        .eq("transaction_type", "saida")\
-        .like("data", f"{mes_ano}%")\
-        .execute()
-
-    total_gasto = sum(tx["value"] for tx in gastos_result.data) if gastos_result.data else 0
-
-    saldo_restante = meta - total_gasto
-    if saldo_restante < 0:
-        saldo_restante = 0
-
-    return {
-        "meta_mensal": meta,
-        "total_gastos": total_gasto,
-        "saldo_restante": saldo_restante
-    }
+def get_user_spend_goal(auth_id):
+    """
+    Retorna a meta mensal de gastos (spend_goal) do usuário
+    
+    Args:
+        auth_id: UUID do usuário
+        
+    Returns:
+        float: Valor da meta mensal ou None se não encontrado
+    """
+    try:
+        result = supabase.table("user_profiles")\
+            .select("spend_goal")\
+            .eq("auth_id", auth_id)\
+            .single()\
+            .execute()
+        
+        if result.data and result.data.get("spend_goal") is not None:
+            return float(result.data["spend_goal"])
+        return None
+    except Exception as e:
+        print(f"Erro ao buscar meta mensal: {e}")
+        return None
